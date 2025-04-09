@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "docker-compose-up-dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d",
+    "docker-compose-down": "docker-compose down --volumes --remove-orphans"
+  }
+}

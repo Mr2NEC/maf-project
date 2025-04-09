@@ -1,0 +1,57 @@
+{
+  "manifest": {
+    "name": "Maf App"
+  },
+  "error": {
+    "description": "<p>На жаль, ми зіткнулися з помилкою.</p><p>Ви можете спробувати <retry>перезавантажити сторінку</retry>, яку ви відвідували.</p>",
+    "title": "Щось пішло не так!"
+  },
+  "not-found-page": {
+    "description": "Будь ласка, перевірте адресний рядок браузера або скористайтеся навігацією, щоб перейти на відому сторінку.",
+    "title": "Сторінка не знайдена"
+  },
+  "navigation": {
+    "about": "Про нас",
+    "blog": "Блог",
+    "calendar": "Календар",
+    "contacts": "Контакти",
+    "players": "Гравці",
+    "rating": "Рейтинг",
+    "tournaments": "Турніри"
+  },
+  "locale-switcher": {
+    "label": "Змінити мову",
+    "en": "Англійська",
+    "uk": "Українська"
+  },
+  "index-page": {
+    "title": "Домашня сторінка"
+  },
+  "about-page": {
+    "title": "Сторінка про нас"
+  },
+  "calendar-page": {
+    "title": "Сторінка календаря"
+  },
+  "tournaments-page": {
+    "title": "Сторінка турнірів"
+  },
+  "players-page": {
+    "title": "Сторінка гравців"
+  },
+  "player-page": {
+    "title": "Сторінка гравця"
+  },
+  "rating-page": {
+    "title": "Сторінка рейтингу"
+  },
+  "blog-page": {
+    "title": "Сторінка блогу"
+  },
+  "contacts-page": {
+    "title": "Сторінка контактів"
+  },
+  "locale-layout": {
+    "title": "Maf App"
+  }
+}

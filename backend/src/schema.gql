@@ -1,0 +1,107 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Club {
+  id: Float!
+  imgSrc: String!
+  owner: ClubOwner!
+  place: Place!
+  region: String!
+  socials: [Social!]!
+  title: String!
+}
+
+type ClubOwner {
+  id: Float!
+  link: String!
+  name: String!
+}
+
+input CreateClubInput {
+  imgSrc: String!
+  owner: CreateClubOwnerInput!
+  place: CreatePlaceInput!
+  region: String!
+  socials: [CreateSocialInput!]!
+  title: String!
+}
+
+input CreateClubOwnerInput {
+  link: String!
+  name: String!
+}
+
+input CreatePlaceInput {
+  city: String!
+  country: String!
+}
+
+input CreatePlayerInput {
+  birthdate: DateTime
+  description: String
+  firstName: String
+  lastName: String
+  username: String!
+}
+
+input CreateSocialInput {
+  link: String!
+  type: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createClub(input: CreateClubInput!): Club!
+  createClubOwner(input: CreateClubOwnerInput!): ClubOwner!
+  createPlayer(createPlayerInput: CreatePlayerInput!): Player!
+  initializeDatabaseClubs: String!
+  removePlayer(id: Float!): Boolean!
+  updatePlayer(id: Int!, updatePlayerInput: UpdatePlayerInput!): Player!
+}
+
+type Place {
+  city: String!
+  country: String!
+  id: Float!
+}
+
+type Player {
+  birthdate: DateTime
+  createdAt: DateTime!
+  description: String
+  firstName: String
+  id: ID!
+  lastName: String
+  socials: [Social!]!
+  updatedAt: DateTime!
+  username: String!
+}
+
+type Query {
+  clubOwner: [ClubOwner!]!
+  findAllClubs: [Club!]!
+  findOneClub(id: Float!): Club!
+  place: [Place!]!
+  player(id: Int!): Player!
+  players: [Player!]!
+  social: [Social!]!
+}
+
+type Social {
+  id: Float!
+  link: String!
+  type: String!
+}
+
+input UpdatePlayerInput {
+  birthdate: DateTime
+  description: String
+  firstName: String
+  lastName: String
+  username: String
+}

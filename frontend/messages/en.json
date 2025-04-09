@@ -1,0 +1,57 @@
+{
+  "manifest": {
+    "name": "Maf App"
+  },
+  "error": {
+    "description": "<p>We've unfortunately encountered an error.</p><p>You can try to <retry>reload the page</retry> you were visiting.</p>",
+    "title": "Something went wrong!"
+  },
+  "not-found-page": {
+    "description": "Please double-check the browser address bar or use the navigation to go to a known page.",
+    "title": "Page not found"
+  },
+  "navigation": {
+    "about": "About us",
+    "blog": "Blog",
+    "calendar": "Calendar",
+    "contacts": "Contacts",
+    "players": "Players",
+    "rating": "Rating",
+    "tournaments": "Tournaments"
+  },
+  "locale-switcher": {
+    "label": "Change language",
+    "en": "English",
+    "uk": "Ukrainian"
+  },
+  "index-page": {
+    "title": "Home page"
+  },
+  "about-page": {
+    "title": "About us page"
+  },
+  "calendar-page": {
+    "title": "Calendar page"
+  },
+  "tournaments-page": {
+    "title": "Tournaments page"
+  },
+  "players-page": {
+    "title": "Players page"
+  },
+  "player-page": {
+    "title": "Player page"
+  },
+  "rating-page": {
+    "title": "Rating page"
+  },
+  "blog-page": {
+    "title": "Blog page"
+  },
+  "contacts-page": {
+    "title": "Contacts page"
+  },
+  "locale-layout": {
+    "title": "Maf App"
+  }
+}
