@@ -7,18 +7,18 @@ import { CreateSocialInput } from './dto/create-social.input';
 @Injectable()
 export class SocialsService {
   constructor(
-    @InjectRepository(Social) private socialRepo: Repository<Social>,
+    @InjectRepository(Social) private socialRepository: Repository<Social>,
   ) {}
 
   async findAll(): Promise<Social[]> {
-    return this.socialRepo.find();
+    return this.socialRepository.find();
   }
 
   async findOneByTypeAndLink(
     type: string,
     link: string,
   ): Promise<Social | null> {
-    return this.socialRepo.findOne({ where: { type, link } });
+    return this.socialRepository.findOne({ where: { type, link } });
   }
 
   async create(socialData: CreateSocialInput): Promise<Social> {
@@ -28,7 +28,7 @@ export class SocialsService {
       throw new Error('Either clubId or userId must be provided');
     }
 
-    const social = this.socialRepo.create({ type, link, clubId, userId });
-    return this.socialRepo.save(social);
+    const social = this.socialRepository.create({ type, link, clubId, userId });
+    return this.socialRepository.save(social);
   }
 }

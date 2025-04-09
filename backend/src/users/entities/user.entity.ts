@@ -54,6 +54,7 @@ export class User {
   @Column({ name: 'club_id', nullable: true })
   clubId: number;
 
+  @Field(() => Club, { nullable: true })
   @ManyToOne(() => Club, club => club.users, { nullable: true })
   @JoinColumn({ name: 'club_id' })
   club?: Club;

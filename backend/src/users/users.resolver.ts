@@ -23,13 +23,13 @@ export class UsersResolver {
     return this.usersService.findOne(id);
   }
 
-  @Mutation(() => User)
-  updateUser(@Args('data') data: UpdateUserInput) {
+  @Mutation(() => User, { name: 'updateUser' })
+  update(@Args('data') data: UpdateUserInput) {
     return this.usersService.update(data.id, data);
   }
 
-  @Mutation(() => User)
-  removeUser(@Args('id', { type: () => Int }) id: number) {
+  @Mutation(() => User, { name: 'removeUser' })
+  remove(@Args('id', { type: () => Int }) id: number) {
     return this.usersService.remove(id);
   }
 }

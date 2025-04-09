@@ -6,7 +6,7 @@ import {
 import { CreateRoleInput } from './dto/create-role.input';
 import { UpdateRoleInput } from './dto/update-role.input';
 import { Role } from './entities/role.entity';
-import { FindManyOptions, In, Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleActionsService } from 'src/role-actions/role-actions.service';
 
@@ -17,21 +17,28 @@ export class RolesService {
     private rolesRepository: Repository<Role>,
     private readonly roleActionsService: RoleActionsService,
   ) {}
-  async create(createRoleInput: CreateRoleInput) {
-    const { name, actionIds } = createRoleInput;
+  
+  async create(data: CreateRoleInput) {
+    const { name, actionIds } = data;
     const existingRole = await this.rolesRepository.findOne({
       where: { name },
     });
+
     if (existingRole) {
       throw new BadRequestException(`Role with name "${name}" already exists`);
     }
 
-    const role = this.rolesRepository.create(createRoleInput);
+    const role = this.rolesRepository.create({ name });
 
-    if (Array.isArray(actionIds) && actionIds.length > 0) {
-      const roleActions = await this.getRoleAction(actionIds);
-      role.actions = roleActions;
+    for (const actionId of actionIds) {
+      const roleAction = await this.roleActionsService.create({
+        roleId: role.id,
+        actionTypeId: actionId,
+      });
+
+      role.actions.push(roleAction);
     }
+
     return this.rolesRepository.save(role);
   }
 
@@ -53,20 +60,8 @@ export class RolesService {
     return role;
   }
 
-  async update(id: number, updateRoleInput: UpdateRoleInput) {
-    const { name, actionIds } = updateRoleInput;
-
-    if (name) {
-      const existingRole = await this.rolesRepository.findOne({
-        where: { name },
-      });
-
-      if (existingRole) {
-        throw new BadRequestException(
-          `Role with name "${name}" already exists`,
-        );
-      }
-    }
+  async update(id: number, data: UpdateRoleInput) {
+    const { name, actionIds } = data;
 
     const role = await this.findOne(id);
 
@@ -74,9 +69,39 @@ export class RolesService {
       throw new NotFoundException('Role not found');
     }
 
+    if (name && role.name !== name) {
+      const existingRole = await this.rolesRepository.findOne({
+        where: { name },
+      });
+      if (existingRole && existingRole.id !== id) {
+        throw new BadRequestException(`Role with name "${name}" already exists`);
+      }
+      role.name = name;
+    }
+
     if (Array.isArray(actionIds) && actionIds.length > 0) {
-      const roleActions = await this.getRoleAction(actionIds);
-      role.actions = roleActions;
+      const existingActionIds = new Set(role.actions.map(action => action.actionTypeId));
+      const actionsToAdd = actionIds.filter(id => !existingActionIds.has(id));
+      const actionsToRemove = role.actions.filter(action => !actionIds.includes(action.actionTypeId));
+
+      if (actionsToRemove.length > 0) {
+        await Promise.all(
+          actionsToRemove.map(action => this.roleActionsService.remove(action.id))
+        );
+        role.actions = role.actions.filter(action => !actionsToRemove.includes(action));
+      }
+
+      if (actionsToAdd.length > 0) {
+        const newActions = await Promise.all(
+          actionsToAdd.map(actionId =>
+            this.roleActionsService.create({
+              roleId: role.id,
+              actionTypeId: actionId,
+            })
+          )
+        );
+        role.actions.push(...newActions);
+      }
     }
 
     return this.rolesRepository.save(role);
@@ -88,12 +113,5 @@ export class RolesService {
       throw new NotFoundException('Role not found');
     }
     return this.rolesRepository.delete(id);
-  }
-
-  async getRoleAction(roleActionIds: number[]) {
-    const roleActions = await this.roleActionsService.findAll({
-      where: { id: In(roleActionIds) },
-    });
-    return roleActions;
   }
 }

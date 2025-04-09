@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreatePlaceInput } from './dto/create-place.input';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Place } from './entities/place.entity';
@@ -6,21 +6,25 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class PlacesService {
-  constructor(@InjectRepository(Place) private placeRepo: Repository<Place>) {}
+  constructor(@InjectRepository(Place) private placesRepository: Repository<Place>) {}
 
   async findAll(): Promise<Place[]> {
-    return this.placeRepo.find();
+    return this.placesRepository.find({ relations: ['clubs'] });
   }
 
   async findOneByLocation(
     country: string,
     city: string,
   ): Promise<Place | null> {
-    return this.placeRepo.findOne({ where: { country, city } });
+    return this.placesRepository.findOne({ where: { country, city }, relations: ['clubs'] });
   }
 
-  async create(placeData: CreatePlaceInput): Promise<Place> {
-    const place = this.placeRepo.create(placeData);
-    return this.placeRepo.save(place);
+  async create(data: CreatePlaceInput): Promise<Place> {
+    const { country, city } = data;
+    if (!country || !city) {
+      throw new BadRequestException('Country and city are required');
+    }
+    const place = this.placesRepository.create({ country, city });
+    return this.placesRepository.save(place);
   }
 }

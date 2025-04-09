@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Repository } from 'typeorm';
 
@@ -21,8 +21,16 @@ export class PlayersService {
   async create(data: CreatePlayerInput) {
     const { userId, gameId, roleId, seatNumber, username } = data;
 
+    if (!userId || !gameId) {
+      throw new BadRequestException('User and game are required');
+    }
+
     const user = await this.usersService.findOne(userId);
     const game = await this.gamesService.findOne(gameId);
+
+    if (!user || !game) {
+      throw new BadRequestException('User or game not found');
+    }
 
     const player = this.playersRepository.create({
       user,
@@ -57,14 +65,51 @@ export class PlayersService {
   }
 
   async remove(id: number) {
-    return this.playersRepository.delete({ id });
-  }
-
-  async update(id: number, newData: UpdatePlayerInput) {
     const player = await this.findOne(id);
     if (!player) {
       throw new Error('Player not found');
     }
-    return this.playersRepository.save({ ...player, ...newData });
+    return this.playersRepository.delete({ id });
+  }
+
+  async update(id: number, data: UpdatePlayerInput) {
+
+    const { userId, gameId, roleId, seatNumber, username } = data;
+
+    const player = await this.findOne(id);
+    if (!player) {
+      throw new Error('Player not found');
+    }
+
+    if (userId) {
+      const user = await this.usersService.findOne(userId);
+      player.user = user;
+    }
+
+    if (gameId) {
+      const game = await this.gamesService.findOne(gameId);
+      if (!game) {
+        throw new Error('Game not found');
+      }
+      player.game = game;
+    }
+
+    if (roleId) {
+      const role = await this.rolesService.findOne(roleId);
+      if (!role) {
+        throw new Error('Role not found');
+      }
+      player.role = role;
+    }
+
+    if (seatNumber) {
+      player.seatNumber = seatNumber;
+    } 
+
+    if (username) {
+      player.username = username;
+    }
+
+    return this.playersRepository.save({ ...player });
   }
 }

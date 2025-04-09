@@ -40,6 +40,7 @@ export class Game {
   @Column({ name: 'game_type_id' })
   gameTypeId: number;
 
+  @Field(() => GameType)
   @ManyToOne(() => GameType, gameType => gameType.games)
   @JoinColumn({ name: 'game_type_id' })
   gameType: GameType;

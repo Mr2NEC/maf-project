@@ -28,6 +28,7 @@ export class Social {
   @Column({ name: 'club_id', nullable: true })
   clubId: number;
 
+  @Field(() => Club, { nullable: true })
   @ManyToOne(() => Club, club => club.socials, { nullable: true })
   @JoinColumn({ name: 'club_id' })
   club: Club;
@@ -36,6 +37,7 @@ export class Social {
   @Column({ name: 'user_id', nullable: true })
   userId: number;
 
+  @Field(() => User, { nullable: true })
   @ManyToOne(() => User, user => user.socials, { nullable: true })
   @JoinColumn({ name: 'user_id' })
   user: User;

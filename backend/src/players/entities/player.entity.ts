@@ -31,6 +31,7 @@ export class Player {
   @Column({ name: 'role_id', nullable: true })
   roleId: number;
 
+  @Field(() => Role, { nullable: true })
   @ManyToOne(() => Role, { nullable: true })
   @JoinColumn({ name: 'role_id' })
   role: Role;
@@ -39,6 +40,7 @@ export class Player {
   @Column({ name: 'user_id' })
   userId: number;
 
+  @Field(() => User)
   @ManyToOne(() => User, user => user.players, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
@@ -47,6 +49,7 @@ export class Player {
   @Column({ name: 'game_id' })
   gameId: number;
 
+  @Field(() => Game)
   @ManyToOne(() => Game, game => game.players)
   @JoinColumn({ name: 'game_id' })
   game: Game;

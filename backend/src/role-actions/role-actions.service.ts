@@ -16,8 +16,8 @@ export class RoleActionsService {
     private readonly rolesService: RolesService,
   ) {}
 
-  async create(createRoleActionInput: CreateRoleActionInput) {
-    const { actionTypeId, roleId } = createRoleActionInput;
+  async create(data: CreateRoleActionInput) {
+    const { actionTypeId, roleId } = data;
 
     const actionType = await this.actionTypesService.findOne(actionTypeId);
 
@@ -55,8 +55,8 @@ export class RoleActionsService {
     return roleAction;
   }
 
-  async update(id: number, updateRoleActionInput: UpdateRoleActionInput) {
-    const { actionTypeId, roleId } = updateRoleActionInput;
+  async update(id: number, data: UpdateRoleActionInput) {
+    const { actionTypeId, roleId } = data;
 
     const roleAction = await this.findOne(id);
 

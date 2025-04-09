@@ -9,11 +9,11 @@ export class CreatePlayerInput {
   gameId: number;
 
   @Field(() => Int, { nullable: true })
-  roleId: number;
+  roleId?: number;
 
   @Field(() => Int, { nullable: true })
-  seatNumber: number;
+  seatNumber?: number;
 
   @Field(() => String, { nullable: true })
-  username: string;
+  username?: string;
 }

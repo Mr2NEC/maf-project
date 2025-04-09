@@ -20,11 +20,11 @@ export class GamesService {
   ) {}
 
   async findAll(): Promise<Game[]> {
-    return this.gamesRepository.find({ relations: ['gameType'] });
+    return this.gamesRepository.find({ relations: ['gameType', 'players'] });
   }
 
   async findOne(id: number): Promise<Game> {
-    const game = await this.gamesRepository.findOne({ where: { id } });
+    const game = await this.gamesRepository.findOne({ where: { id }, relations: ['gameType', 'players'] });
     if (!game) {
       throw new NotFoundException('Game not found');
     }
@@ -33,6 +33,11 @@ export class GamesService {
 
   async create(data: CreateGameInput): Promise<Game> {
     const { gameTypeId, startDate } = data;
+
+    if (!gameTypeId) {
+      throw new BadRequestException('Game type is required');
+    }
+
     const gameType = await this.gameTypesRepository.findOne(gameTypeId);
 
     if (!this.dateUtils.isTodayOrFuture(startDate)) {
@@ -40,13 +45,15 @@ export class GamesService {
         'Start date must be today or in the future',
       );
     }
+    
     const newGame = this.gamesRepository.create({ gameType, startDate });
     return this.gamesRepository.save(newGame);
   }
 
   async update(id: number, data: UpdateGameInput): Promise<Game> {
-    const { gameTypeId, startDate } = data;
+    const { gameTypeId, startDate, status, currentRound} = data;
     const game = await this.findOne(id);
+    
     if (!game) {
       throw new NotFoundException('Game not found');
     }
@@ -67,6 +74,22 @@ export class GamesService {
       game.startDate = startDate;
     }
 
+    if (status) {
+      game.status = status;
+    }
+
+    if (currentRound && currentRound >= game.currentRound) {
+      game.currentRound = currentRound;
+    }
+
     return this.gamesRepository.save(game);
+  }
+
+  async delete(id: number) {
+    const game = await this.findOne(id);
+    if (!game) {
+      throw new NotFoundException('Game not found');
+    }
+    return this.gamesRepository.delete(id);
   }
 }

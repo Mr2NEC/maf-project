@@ -11,13 +11,13 @@ import { ClubsService } from 'src/clubs/clubs.service';
 export class UsersService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
-    private socialsRepository: SocialsService,
-    private clubsRepository: ClubsService,
+    private socialsService: SocialsService,
+    private clubsService: ClubsService,
   ) {}
 
-  async create(createUserInput: CreateUserInput) {
+  async create(data: CreateUserInput) {
     const { lastName, firstName, username, birthdate, clubId, socials } =
-      createUserInput;
+    data;
 
     const user = this.usersRepository.create({
       lastName,
@@ -27,7 +27,7 @@ export class UsersService {
 
     if (Array.isArray(socials) && socials.length > 0) {
       for (const social of socials) {
-        await this.socialsRepository.create({
+        await this.socialsService.create({
           ...social,
           userId: user.id,
         });
@@ -39,7 +39,7 @@ export class UsersService {
     }
 
     if (clubId) {
-      const club = await this.clubsRepository.findOne(clubId);
+      const club = await this.clubsService.findOne(clubId);
       if (club) {
         user.clubId = club.id;
       }
@@ -66,9 +66,9 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserInput: UpdateUserInput) {
+  async update(id: number, data: UpdateUserInput) {
     const { lastName, firstName, username, birthdate, clubId, socials } =
-      updateUserInput;
+    data;
 
     const user = await this.findOne(id);
     if (!user) {
@@ -92,7 +92,7 @@ export class UsersService {
     }
 
     if (clubId) {
-      const club = await this.clubsRepository.findOne(clubId);
+      const club = await this.clubsService.findOne(clubId);
       if (club) {
         user.clubId = club.id;
       }
@@ -101,12 +101,12 @@ export class UsersService {
     if (Array.isArray(socials) && socials.length > 0) {
       for (const social of socials) {
         const existingSocial =
-          await this.socialsRepository.findOneByTypeAndLink(
+          await this.socialsService.findOneByTypeAndLink(
             social.type,
             social.link,
           );
         if (!existingSocial) {
-          await this.socialsRepository.create({
+          await this.socialsService.create({
             ...social,
             userId: user.id,
           });
