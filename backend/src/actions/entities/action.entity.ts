@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { ActionTarget } from 'src/action-targets/entities/action-target.entity';
 
@@ -18,20 +19,37 @@ export class Action {
   @PrimaryGeneratedColumn()
   readonly id: number;
 
+  @Field(() => Int)
+  @Column({ name: 'game_id' })
+  gameId: number;
+
   @Field(() => Game)
   @ManyToOne(() => Game, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'game_id' })
   game: Game;
+
+  @Field(() => Int)
+  @Column({ name: 'actor_id' })
+  actorId: number;
 
   @Field(() => Player)
   @ManyToOne(() => Player, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'actor_id' })
   actor: Player;
 
   @Field(() => [ActionTarget], { nullable: true })
-  @OneToMany(() => ActionTarget, actionTarget => actionTarget.action)
+  @OneToMany(() => ActionTarget, actionTarget => actionTarget.action, {
+    nullable: true,
+  })
   targets: ActionTarget[];
+
+  @Field(() => Int)
+  @Column({ name: 'action_type_id' })
+  actionTypeId: number;
 
   @Field(() => ActionType)
   @ManyToOne(() => ActionType, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'action_type_id' })
   actionType: ActionType;
 
   @Field(() => Int)

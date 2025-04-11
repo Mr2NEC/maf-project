@@ -8,43 +8,37 @@ import { UpdateGameTypeRoleInput } from './dto/update-game-type-role.input';
 import { GameTypeRole } from './entities/game-type-role.entity';
 import { FindManyOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RolesService } from 'src/roles/roles.service';
-import { GameTypesService } from 'src/game-types/game-types.service';
 
 @Injectable()
 export class GameTypeRolesService {
   constructor(
     @InjectRepository(GameTypeRole)
     private gameTypeRolesRepository: Repository<GameTypeRole>,
-    private readonly gameTypesService: GameTypesService,
-    private readonly rolesService: RolesService,
   ) {}
 
   async create(
     createGameTypeRoleInput: CreateGameTypeRoleInput,
   ): Promise<GameTypeRole> {
-    const { gameTypeId, roleId, count } = createGameTypeRoleInput;
-
-    const gameType = await this.gameTypesService.findOne(gameTypeId);
-
-    if (!gameType) {
-      throw new NotFoundException('Game type not found');
-    }
-
-    const role = await this.rolesService.findOne(roleId);
-
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
+    const { gameType, role, count } = createGameTypeRoleInput;
 
     if (count < 1) {
       throw new BadRequestException('Count must be greater than 0');
+    }
+
+    if (!gameType) {
+      throw new BadRequestException('Game type is required');
+    }
+
+    if (!role) {
+      throw new BadRequestException('Role is required');
     }
 
     const gameTypeRole = this.gameTypeRolesRepository.create({
       gameType,
       role,
       count,
+      roleId: role.id,
+      gameTypeId: gameType.id,
     });
 
     return this.gameTypeRolesRepository.save(gameTypeRole);
@@ -57,32 +51,49 @@ export class GameTypeRolesService {
     });
   }
 
-  findOne(id: number) {
-    return this.gameTypeRolesRepository.findOne({
+  async findOne(id: number) {
+    const gameTypeRole = await this.gameTypeRolesRepository.findOne({
       where: { id },
       relations: ['gameType', 'role'],
     });
+
+    if (!gameTypeRole) {
+      throw new NotFoundException('Game type role not found');
+    }
+
+    return gameTypeRole;
   }
 
   async update(id: number, updateGameTypeRoleInput: UpdateGameTypeRoleInput) {
-    const { gameTypeId, roleId, count } = updateGameTypeRoleInput;
+    const { gameType, role, count } = updateGameTypeRoleInput;
     const gameTypeRole = await this.findOne(id);
 
     if (!gameTypeRole) {
       throw new NotFoundException('Game type role not found');
     }
 
-    const gameType = gameTypeId
-      ? await this.gameTypesService.findOne(gameTypeId)
-      : gameTypeRole.gameType;
-    const role = roleId
-      ? await this.rolesService.findOne(roleId)
-      : gameTypeRole.role;
+    if (gameType) {
+      gameTypeRole.gameType = gameType;
+    }
 
-    return this.gameTypeRolesRepository.update(id, { gameType, role, count });
+    if (role) {
+      gameTypeRole.role = role;
+    }
+
+    if (count) {
+      gameTypeRole.count = count;
+    }
+
+    return this.gameTypeRolesRepository.save(gameTypeRole);
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    const gameTypeRole = await this.findOne(id);
+
+    if (!gameTypeRole) {
+      throw new NotFoundException('Game type role not found');
+    }
+
     return this.gameTypeRolesRepository.delete(id);
   }
 }

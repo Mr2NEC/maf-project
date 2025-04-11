@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ClubsService } from './clubs.service';
 import { ClubsResolver } from './clubs.resolver';
 import { Club } from './entities/club.entity';
@@ -10,9 +10,9 @@ import { PlacesModule } from 'src/places/places.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Club]),
-    ClubOwnersModule,
+    forwardRef(() => ClubOwnersModule),
     PlacesModule,
-    SocialsModule,
+    forwardRef(() => SocialsModule),
   ],
   providers: [ClubsResolver, ClubsService],
   exports: [ClubsService],

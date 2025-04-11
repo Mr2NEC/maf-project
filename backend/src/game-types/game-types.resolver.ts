@@ -8,8 +8,8 @@ import { UpdateGameTypeInput } from './dto/update-game-type.input';
 export class GameTypesResolver {
   constructor(private readonly gameTypesService: GameTypesService) {}
 
-  @Mutation(() => GameType)
-  async createGameType(@Args('data') data: CreateGameTypeInput) {
+  @Mutation(() => GameType, { name: 'createGameType' })
+  create(@Args('data') data: CreateGameTypeInput) {
     return this.gameTypesService.create(data);
   }
 
@@ -23,16 +23,13 @@ export class GameTypesResolver {
     return this.gameTypesService.findOne(id);
   }
 
-  @Mutation(() => GameType)
-  updateGameType(
-    @Args('id') id: number,
-    @Args('data') data: UpdateGameTypeInput,
-  ) {
+  @Mutation(() => GameType, { name: 'updateGameType' })
+  update(@Args('id') id: number, @Args('data') data: UpdateGameTypeInput) {
     return this.gameTypesService.update(id, { ...data });
   }
 
-  @Mutation(() => GameType)
-  removeGameType(@Args('id', { type: () => Int }) id: number) {
+  @Mutation(() => GameType, { name: 'removeGameType' })
+  remove(@Args('id', { type: () => Int }) id: number) {
     return this.gameTypesService.remove(id);
   }
 }

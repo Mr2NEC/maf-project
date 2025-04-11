@@ -27,5 +27,5 @@ export class GameType {
 
   @Field(() => [GameTypeRole])
   @OneToMany(() => GameTypeRole, gameTypeRole => gameTypeRole.gameType)
-  roles: GameTypeRole[];
+  gameTypeRoles: GameTypeRole[];
 }

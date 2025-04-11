@@ -13,5 +13,5 @@ export class CreateGameTypeInput {
   playersCount: number;
 
   @Field(() => [CreateGameTypeRoleInput])
-  roles: CreateGameTypeRoleInput[];
+  gameTypeRoles: CreateGameTypeRoleInput[];
 }

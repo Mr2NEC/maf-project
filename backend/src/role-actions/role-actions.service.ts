@@ -13,11 +13,10 @@ export class RoleActionsService {
     @InjectRepository(RoleAction)
     private roleActionsRepository: Repository<RoleAction>,
     private readonly actionTypesService: ActionTypesService,
-    private readonly rolesService: RolesService,
   ) {}
 
   async create(data: CreateRoleActionInput) {
-    const { actionTypeId, roleId } = data;
+    const { actionTypeId, role } = data;
 
     const actionType = await this.actionTypesService.findOne(actionTypeId);
 
@@ -25,12 +24,6 @@ export class RoleActionsService {
       throw new NotFoundException(
         `Action type with id ${actionTypeId} not found`,
       );
-    }
-
-    const role = await this.rolesService.findOne(roleId);
-
-    if (!role) {
-      throw new NotFoundException(`Role with id ${roleId} not found`);
     }
 
     const roleAction = await this.roleActionsRepository.create({
@@ -56,7 +49,7 @@ export class RoleActionsService {
   }
 
   async update(id: number, data: UpdateRoleActionInput) {
-    const { actionTypeId, roleId } = data;
+    const { actionTypeId, role } = data;
 
     const roleAction = await this.findOne(id);
 
@@ -69,9 +62,9 @@ export class RoleActionsService {
       roleAction.actionType = actionType;
     }
 
-    if (roleId) {
-      const role = await this.rolesService.findOne(roleId);
+    if (role) {
       roleAction.role = role;
+      roleAction.roleId = role.id;
     }
 
     return this.roleActionsRepository.save(roleAction);

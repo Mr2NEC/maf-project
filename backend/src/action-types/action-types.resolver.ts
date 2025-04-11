@@ -1,14 +1,16 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { ActionTypesService } from './action-types.service';
 import { ActionType } from './entities/action-type.entity';
+import { UpdateActionTypeInput } from './dto/update-action-type.input';
+import { CreateActionTypeInput } from './dto/create-action-type.input';
 
 @Resolver(() => ActionType)
 export class ActionTypesResolver {
   constructor(private readonly actionTypesService: ActionTypesService) {}
 
-  @Mutation(() => ActionType)
-  createActionType(@Args('name') name: string) {
-    return this.actionTypesService.create({ name });
+  @Mutation(() => ActionType, { name: 'createActionType' })
+  create(@Args('data') data: CreateActionTypeInput) {
+    return this.actionTypesService.create(data);
   }
 
   @Query(() => [ActionType], { name: 'actionTypes' })
@@ -21,16 +23,13 @@ export class ActionTypesResolver {
     return this.actionTypesService.findOne(id);
   }
 
-  @Mutation(() => ActionType)
-  updateActionType(
-    @Args('id', { type: () => Int }) id: number,
-    @Args('name') name: string,
-  ) {
-    return this.actionTypesService.update(id, { id, name });
+  @Mutation(() => ActionType, { name: 'updateActionType' })
+  update(@Args('data') data: UpdateActionTypeInput) {
+    return this.actionTypesService.update(data.id, data);
   }
 
-  @Mutation(() => ActionType)
-  removeActionType(@Args('id', { type: () => Int }) id: number) {
+  @Mutation(() => ActionType, { name: 'removeActionType' })
+  remove(@Args('id', { type: () => Int }) id: number) {
     return this.actionTypesService.remove(id);
   }
 }

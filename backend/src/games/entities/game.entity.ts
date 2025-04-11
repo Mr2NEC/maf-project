@@ -1,4 +1,4 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Action } from 'src/actions/entities/action.entity';
 import { GameType } from 'src/game-types/entities/game-type.entity';
 import { Player } from 'src/players/entities/player.entity';
@@ -13,6 +13,17 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+export enum GameStatus {
+  WAITING = 'waiting',
+  IN_PROGRESS = 'in_progress',
+  FINISHED = 'finished',
+}
+
+registerEnumType(GameStatus, {
+  name: 'GameStatus',
+  description: 'The status of a game',
+});
+
 @ObjectType()
 @Entity({ name: 'games' })
 export class Game {
@@ -20,13 +31,13 @@ export class Game {
   @PrimaryGeneratedColumn()
   readonly id: number;
 
-  @Field(() => String)
+  @Field(() => GameStatus)
   @Column({
     type: 'enum',
-    enum: ['waiting', 'in_progress', 'finished'],
-    default: 'waiting',
+    enum: GameStatus,
+    default: GameStatus.WAITING,
   })
-  status: string;
+  status: GameStatus;
 
   @Field(() => [Player], { nullable: true })
   @OneToMany(() => Player, player => player.game, { nullable: true })

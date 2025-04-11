@@ -8,9 +8,9 @@ import { UpdateActionInput } from './dto/update-action.input';
 export class ActionsResolver {
   constructor(private readonly actionsService: ActionsService) {}
 
-  @Mutation(() => Action)
-  createAction(@Args('createActionInput') createActionInput: CreateActionInput) {
-    return this.actionsService.create(createActionInput);
+  @Mutation(() => Action, { name: 'createAction' })
+  create(@Args('data') data: CreateActionInput) {
+    return this.actionsService.create(data);
   }
 
   @Query(() => [Action], { name: 'actions' })
@@ -23,13 +23,13 @@ export class ActionsResolver {
     return this.actionsService.findOne(id);
   }
 
-  @Mutation(() => Action)
-  updateAction(@Args('updateActionInput') updateActionInput: UpdateActionInput) {
-    return this.actionsService.update(updateActionInput.id, updateActionInput);
+  @Mutation(() => Action, { name: 'updateAction' })
+  update(@Args('id') id: number, @Args('data') data: UpdateActionInput) {
+    return this.actionsService.update(id, { ...data });
   }
 
-  @Mutation(() => Action)
-  removeAction(@Args('id', { type: () => Int }) id: number) {
+  @Mutation(() => Action, { name: 'removeAction' })
+  remove(@Args('id', { type: () => Int }) id: number) {
     return this.actionsService.remove(id);
   }
 }

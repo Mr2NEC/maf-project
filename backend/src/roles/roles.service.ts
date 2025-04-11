@@ -17,7 +17,7 @@ export class RolesService {
     private rolesRepository: Repository<Role>,
     private readonly roleActionsService: RoleActionsService,
   ) {}
-  
+
   async create(data: CreateRoleInput) {
     const { name, actionIds } = data;
     const existingRole = await this.rolesRepository.findOne({
@@ -32,7 +32,7 @@ export class RolesService {
 
     for (const actionId of actionIds) {
       const roleAction = await this.roleActionsService.create({
-        roleId: role.id,
+        role,
         actionTypeId: actionId,
       });
 
@@ -74,31 +74,41 @@ export class RolesService {
         where: { name },
       });
       if (existingRole && existingRole.id !== id) {
-        throw new BadRequestException(`Role with name "${name}" already exists`);
+        throw new BadRequestException(
+          `Role with name "${name}" already exists`,
+        );
       }
       role.name = name;
     }
 
     if (Array.isArray(actionIds) && actionIds.length > 0) {
-      const existingActionIds = new Set(role.actions.map(action => action.actionTypeId));
+      const existingActionIds = new Set(
+        role.actions.map(action => action.actionTypeId),
+      );
       const actionsToAdd = actionIds.filter(id => !existingActionIds.has(id));
-      const actionsToRemove = role.actions.filter(action => !actionIds.includes(action.actionTypeId));
+      const actionsToRemove = role.actions.filter(
+        action => !actionIds.includes(action.actionTypeId),
+      );
 
       if (actionsToRemove.length > 0) {
         await Promise.all(
-          actionsToRemove.map(action => this.roleActionsService.remove(action.id))
+          actionsToRemove.map(action =>
+            this.roleActionsService.remove(action.id),
+          ),
         );
-        role.actions = role.actions.filter(action => !actionsToRemove.includes(action));
+        role.actions = role.actions.filter(
+          action => !actionsToRemove.includes(action),
+        );
       }
 
       if (actionsToAdd.length > 0) {
         const newActions = await Promise.all(
           actionsToAdd.map(actionId =>
             this.roleActionsService.create({
-              roleId: role.id,
+              role,
               actionTypeId: actionId,
-            })
-          )
+            }),
+          ),
         );
         role.actions.push(...newActions);
       }

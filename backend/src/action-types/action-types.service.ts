@@ -28,7 +28,7 @@ export class ActionTypesService {
       );
     }
 
-    const actionType = this.actionTypesRepository.create(createActionTypeInput);
+    const actionType = this.actionTypesRepository.create({ name });
     return this.actionTypesRepository.save(actionType);
   }
 
@@ -48,21 +48,27 @@ export class ActionTypesService {
 
   async update(id: number, updateActionTypeInput: UpdateActionTypeInput) {
     const { name } = updateActionTypeInput;
-    const existingActionType = await this.actionTypesRepository.findOne({
-      where: { name },
-    });
-
-    if (existingActionType) {
-      throw new BadRequestException(
-        `Action type with name "${name}" already exists`,
-      );
-    }
 
     const actionType = await this.findOne(id);
-    return this.actionTypesRepository.save({
-      ...actionType,
-      name,
-    });
+    if (!actionType) {
+      throw new NotFoundException(`Action type with id ${id} not found`);
+    }
+
+    if (name) {
+      const existingActionType = await this.actionTypesRepository.findOne({
+        where: { name },
+      });
+
+      if (existingActionType) {
+        throw new BadRequestException(
+          `Action type with name "${name}" already exists`,
+        );
+      }
+
+      actionType.name = name;
+    }
+
+    return this.actionTypesRepository.save(actionType);
   }
 
   async remove(id: number) {
