@@ -39,8 +39,8 @@ export class Game {
   })
   status: GameStatus;
 
-  @Field(() => [Player], { nullable: true })
-  @OneToMany(() => Player, player => player.game, { nullable: true })
+  @Field(() => [Player])
+  @OneToMany(() => Player, player => player.game)
   players: Player[];
 
   @Field(() => Int)
@@ -64,11 +64,11 @@ export class Game {
   @OneToMany(() => Action, action => action.game)
   actions: Action[];
 
+  @Field(() => Date)
   @CreateDateColumn()
-  @Field()
   readonly createdAt: Date;
 
+  @Field(() => Date)
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 }

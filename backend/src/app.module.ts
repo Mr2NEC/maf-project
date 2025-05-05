@@ -24,6 +24,8 @@ import { GameTypesModule } from './game-types/game-types.module';
 import { GameTypeRolesModule } from './game-type-roles/game-type-roles.module';
 import { SharedModule } from './shared/shared.module';
 
+console.log(process.env);
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -50,6 +52,10 @@ import { SharedModule } from './shared/shared.module';
       sortSchema: true,
     }),
     PlayersModule,
+    RolesModule,
+    RoleActionsModule,
+    GameTypesModule,
+    GameTypeRolesModule,
     PlacesModule,
     ClubsModule,
     ClubOwnersModule,
@@ -57,13 +63,10 @@ import { SharedModule } from './shared/shared.module';
     DataInitializerModule,
     GamesModule,
     UsersModule,
-    RoleActionsModule,
-    RolesModule,
     ActionsModule,
     ActionTypesModule,
     ActionTargetsModule,
-    GameTypesModule,
-    GameTypeRolesModule,
+
     SharedModule,
   ],
 })

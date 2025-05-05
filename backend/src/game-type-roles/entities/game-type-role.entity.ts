@@ -1,9 +1,16 @@
 import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { GameType } from 'src/game-types/entities/game-type.entity';
 import { Role } from 'src/roles/entities/role.entity';
-import { Column, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @ObjectType()
+@Entity({ name: 'game_type_roles' })
 export class GameTypeRole {
   @Field(() => ID)
   @PrimaryGeneratedColumn()

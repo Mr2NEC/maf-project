@@ -24,7 +24,7 @@ export class GameTypesService {
 
   async findAll(): Promise<GameType[]> {
     return this.gameTypeRepository.find({
-      relations: ['roles', 'roles.role'],
+      relations: ['gameTypeRoles', 'gameTypeRoles.role'],
       order: { name: 'ASC' },
     });
   }
@@ -32,7 +32,7 @@ export class GameTypesService {
   async findOne(id: number): Promise<GameType> {
     const gameType = await this.gameTypeRepository.findOne({
       where: { id },
-      relations: ['roles', 'roles.role'],
+      relations: ['gameTypeRoles', 'gameTypeRoles.role'],
     });
 
     if (!gameType) {
@@ -89,17 +89,13 @@ export class GameTypesService {
       }
 
       const typeRole = await this.gameTypeRolesService.create({
-        gameType,
-        role,
-        count: gameTypeRole.count,
-        roleId: gameTypeRole.roleId,
         gameTypeId: gameType.id,
+        roleId: role.id,
+        count: gameTypeRole.count,
       });
 
       roles.push(typeRole);
     }
-
-    gameType.gameTypeRoles = roles;
 
     return this.gameTypeRepository.save(gameType);
   }
@@ -146,8 +142,8 @@ export class GameTypesService {
       );
 
       if (rolesToRemove.length > 0) {
-        await Promise.all(
-          rolesToRemove.map(role => this.gameTypeRolesService.remove(role.id)),
+        await this.gameTypeRolesService.removeBatch(
+          rolesToRemove.map(role => role.id),
         );
         gameType.gameTypeRoles = gameType.gameTypeRoles.filter(
           role => !rolesToRemove.some(removeRole => removeRole.id === role.id),
@@ -158,7 +154,7 @@ export class GameTypesService {
         const newRoles = await Promise.all(
           rolesToAdd.map(gameTypeRole =>
             this.gameTypeRolesService.create({
-              gameType,
+              gameTypeId: gameType.id,
               roleId: gameTypeRole.roleId,
               count: gameTypeRole.count,
             }),

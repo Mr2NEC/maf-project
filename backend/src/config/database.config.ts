@@ -1,10 +1,10 @@
 import { registerAs } from '@nestjs/config';
 
 export const databaseConfig = registerAs('database', () => ({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  name: process.env.DB_NAME,
-  synchronize: process.env.DB_SYNCHRONIZE === 'true',
+  host: process.env.MYSQL_HOST,
+  port: process.env.MYSQL_PORT ? parseInt(process.env.MYSQL_PORT, 10) : 3306,
+  username: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  name: process.env.MYSQL_DATABASE,
+  synchronize: process.env.MYSQL_SYNCHRONIZE === 'true',
 }));

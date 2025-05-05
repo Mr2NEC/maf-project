@@ -6,6 +6,7 @@ import { Social } from 'src/socials/entities/social.entity';
 import {
   Column,
   CreateDateColumn,
+  Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -14,6 +15,7 @@ import {
 } from 'typeorm';
 
 @ObjectType()
+@Entity({ name: 'users' })
 export class User {
   @Field(() => ID)
   @PrimaryGeneratedColumn()

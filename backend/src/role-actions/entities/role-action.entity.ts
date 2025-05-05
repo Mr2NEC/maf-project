@@ -1,14 +1,21 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { ActionType } from 'src/action-types/entities/action-type.entity';
 import { Role } from 'src/roles/entities/role.entity';
-import { Column, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @ObjectType()
+@Entity({ name: 'role_actions' })
 export class RoleAction {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
   id: number;
-  
+
   @Field(() => Int)
   @Column({ name: 'role_id' })
   roleId: number;

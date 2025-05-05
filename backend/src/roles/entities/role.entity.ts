@@ -1,9 +1,10 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { RoleAction } from 'src/role-actions/entities/role-action.entity';
 import { GameTypeRole } from 'src/game-type-roles/entities/game-type-role.entity';
 
 @ObjectType()
+@Entity({ name: 'roles' })
 export class Role {
   @Field(() => Int)
   @PrimaryGeneratedColumn()

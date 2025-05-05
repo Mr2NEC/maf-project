@@ -1,9 +1,10 @@
 import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { GameTypeRole } from 'src/game-type-roles/entities/game-type-role.entity';
 import { Game } from 'src/games/entities/game.entity';
-import { Column, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @ObjectType()
+@Entity({ name: 'game_types' })
 export class GameType {
   @Field(() => ID)
   @PrimaryGeneratedColumn()
@@ -21,11 +22,11 @@ export class GameType {
   @Column()
   playersCount: number;
 
-  @Field(() => [Game], { nullable: true })
-  @OneToMany(() => Game, game => game.gameType, { nullable: true })
+  @Field(() => [Game])
+  @OneToMany(() => Game, game => game.gameType)
   games: Game[];
 
   @Field(() => [GameTypeRole])
-  @OneToMany(() => GameTypeRole, gameTypeRole => gameTypeRole.gameType)
+  @OneToMany(() => GameTypeRole, role => role.gameType)
   gameTypeRoles: GameTypeRole[];
 }

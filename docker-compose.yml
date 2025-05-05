@@ -1,20 +1,66 @@
-version: "3.8"
-
 services:
   mysql:
     image: mysql:8.0
+    container_name: maf_mysql_db_dev
     restart: always
-    env_file:
-      - .env
     environment:
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - mysql_data:/var/lib/mysql
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "${DB_PORT}:3306"
+      - "${MYSQL_PORT_OUT}:${MYSQL_PORT_IN}"
+    volumes:
+      - MYSQL_data_dev:/var/lib/mysql
+    networks:
+      - app-network-dev
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ${DOCKERFILE_BACKEND}
+    container_name: maf_backend_app_dev
+    restart: always
+    environment:
+      NODE_ENV: development
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT_IN}
+      MYSQL_SYNCHRONIZE: ${MYSQL_SYNCHRONIZE}
+    ports:
+      - "5000:3000"
+    depends_on:
+      - mysql
+    networks:
+      - app-network-dev
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ${DOCKERFILE_FRONTEND}
+    container_name: maf_frontend_app_dev
+    restart: always
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:5000/graphql
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - app-network-dev
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+
+networks:
+  app-network-dev:
+    driver: bridge
 
 volumes:
-  mysql_data:
+  MYSQL_data_dev:

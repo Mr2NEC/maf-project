@@ -31,22 +31,24 @@ export class RolesService {
     const role = this.rolesRepository.create({ name });
 
     for (const actionId of actionIds) {
-      const roleAction = await this.roleActionsService.create({
-        role,
+      await this.roleActionsService.create({
+        roleId: role.id,
         actionTypeId: actionId,
       });
-
-      role.actions.push(roleAction);
     }
 
     return this.rolesRepository.save(role);
   }
 
-  findAll(options: FindManyOptions<Role> = {}) {
-    return this.rolesRepository.find({
-      relations: ['actions', 'gameTypeRoles'],
+  findAll(
+    options: FindManyOptions<Role> = {},
+    includeRelations: boolean = true,
+  ) {
+    const findOptions: FindManyOptions<Role> = {
       ...options,
-    });
+      relations: includeRelations ? ['actions', 'gameTypeRoles'] : [],
+    };
+    return this.rolesRepository.find(findOptions);
   }
 
   async findOne(id: number) {
@@ -91,10 +93,8 @@ export class RolesService {
       );
 
       if (actionsToRemove.length > 0) {
-        await Promise.all(
-          actionsToRemove.map(action =>
-            this.roleActionsService.remove(action.id),
-          ),
+        await this.roleActionsService.removeBatch(
+          actionsToRemove.map(action => action.id),
         );
         role.actions = role.actions.filter(
           action => !actionsToRemove.includes(action),
@@ -105,7 +105,7 @@ export class RolesService {
         const newActions = await Promise.all(
           actionsToAdd.map(actionId =>
             this.roleActionsService.create({
-              role,
+              roleId: role.id,
               actionTypeId: actionId,
             }),
           ),
