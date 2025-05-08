@@ -7,7 +7,7 @@ export class ValidationUtils {
    * @param email Email to validate
    * @returns True if email is valid
    */
-  isValidEmail(email: string): boolean {
+  static isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
@@ -18,7 +18,7 @@ export class ValidationUtils {
    * @param minLength Minimum length required
    * @returns True if password meets requirements
    */
-  isValidPassword(password: string, minLength = 8): boolean {
+  static isValidPassword(password: string, minLength = 8): boolean {
     const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
     const hasNumbers = /\d/.test(password);
@@ -38,8 +38,12 @@ export class ValidationUtils {
    * @param phone Phone number to validate
    * @returns True if phone number is valid
    */
-  isValidPhoneNumber(phone: string): boolean {
+  static isValidPhoneNumber(phone: string): boolean {
     const phoneRegex = /^\+?[\d\s-]{10,}$/;
     return phoneRegex.test(phone);
+  }
+
+  static isSuccessResult(result: any): boolean {
+    return (result.affected ?? 0) > 0;
   }
 }

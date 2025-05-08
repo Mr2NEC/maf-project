@@ -8,15 +8,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateGameInput } from './dto/create-game.input';
 import { GameTypesService } from 'src/game-types/game-types.service';
-import { DateUtils } from 'src/shared/utils/date.utils';
 import { UpdateGameInput } from './dto/update-game.input';
+import { DateUtils } from 'src/common/utils/date.utils';
 
 @Injectable()
 export class GamesService {
   constructor(
     @InjectRepository(Game) private gamesRepository: Repository<Game>,
     private gameTypesRepository: GameTypesService,
-    private readonly dateUtils: DateUtils,
   ) {}
 
   async findAll(): Promise<Game[]> {
@@ -24,7 +23,10 @@ export class GamesService {
   }
 
   async findOne(id: number): Promise<Game> {
-    const game = await this.gamesRepository.findOne({ where: { id }, relations: ['gameType', 'players'] });
+    const game = await this.gamesRepository.findOne({
+      where: { id },
+      relations: ['gameType', 'players'],
+    });
     if (!game) {
       throw new NotFoundException('Game not found');
     }
@@ -40,20 +42,20 @@ export class GamesService {
 
     const gameType = await this.gameTypesRepository.findOne(gameTypeId);
 
-    if (!this.dateUtils.isTodayOrFuture(startDate)) {
+    if (!DateUtils.isTodayOrFuture(startDate)) {
       throw new BadRequestException(
         'Start date must be today or in the future',
       );
     }
-    
+
     const newGame = this.gamesRepository.create({ gameType, startDate });
     return this.gamesRepository.save(newGame);
   }
 
   async update(id: number, data: UpdateGameInput): Promise<Game> {
-    const { gameTypeId, startDate, status, currentRound} = data;
+    const { gameTypeId, startDate, status, currentRound } = data;
     const game = await this.findOne(id);
-    
+
     if (!game) {
       throw new NotFoundException('Game not found');
     }
@@ -66,7 +68,7 @@ export class GamesService {
       game.gameType = gameType;
     }
 
-    if (startDate && !this.dateUtils.isTodayOrFuture(startDate)) {
+    if (startDate && !DateUtils.isTodayOrFuture(startDate)) {
       throw new BadRequestException(
         'Start date must be today or in the future',
       );

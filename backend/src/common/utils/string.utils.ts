@@ -7,7 +7,7 @@ export class StringUtils {
    * @param length Length of the random string
    * @returns Random string
    */
-  generateRandomString(length: number): string {
+  static generateRandomString(length: number): string {
     const characters =
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -24,7 +24,7 @@ export class StringUtils {
    * @param str String to convert
    * @returns Title case string
    */
-  toTitleCase(str: string): string {
+  static toTitleCase(str: string): string {
     return str
       .toLowerCase()
       .split(' ')
@@ -39,7 +39,7 @@ export class StringUtils {
    * @param suffix Suffix to add if truncated (default: '...')
    * @returns Truncated string
    */
-  truncate(str: string, length: number, suffix = '...'): string {
+  static truncate(str: string, length: number, suffix = '...'): string {
     if (str.length <= length) return str;
     return str.substring(0, length) + suffix;
   }

@@ -29,15 +29,15 @@ export default tseslint.config(
   {
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'warn',
+      '@typescript-eslint/no-unsafe-call': 'warn',
+      '@typescript-eslint/no-unsafe-member-access': 'warn',
       '@typescript-eslint/no-unsafe-function-type': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-misused-promises': [
         'error',
         {
@@ -46,7 +46,7 @@ export default tseslint.config(
           endOfLine: 'auto',
         },
       ],
-      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/require-await': 'warn',
       '@typescript-eslint/prefer-promise-reject-errors': 'off',
       '@typescript-eslint/no-base-to-string': 'off',
       '@typescript-eslint/unbound-method': 'off',

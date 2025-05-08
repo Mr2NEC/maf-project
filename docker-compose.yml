@@ -29,8 +29,16 @@ services:
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_PORT: ${MYSQL_PORT_IN}
       MYSQL_SYNCHRONIZE: ${MYSQL_SYNCHRONIZE}
+      BACKEND_PORT: ${BACKEND_PORT}
+      GRAPHQL_DEBUG: ${GRAPHQL_DEBUG}
+      GRAPHQL_PLAYGROUND: ${GRAPHQL_PLAYGROUND}
+      GRAPHQL_INTROSPECTION: ${GRAPHQL_INTROSPECTION}
+      GRAPHQL_SCHEMA_PATH: ${GRAPHQL_SCHEMA_PATH}
+      GRAPHQL_SORT_SCHEMA: ${GRAPHQL_SORT_SCHEMA}
+      GRAPHQL_PATH: ${GRAPHQL_PATH}
+      GRAPHQL_CORS: ${GRAPHQL_CORS}
     ports:
-      - "5000:3000"
+      - "${BACKEND_PORT}:4000"
     depends_on:
       - mysql
     networks:
@@ -47,7 +55,9 @@ services:
     restart: always
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:5000/graphql
+      WATCHPACK_POLLING: true
+      CHOKIDAR_USEPOLLING: true
+      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT}${GRAPHQL_PATH}
     ports:
       - "3000:3000"
     depends_on:

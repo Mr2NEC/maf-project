@@ -12,6 +12,7 @@ import { ActionTypesService } from 'src/action-types/action-types.service';
 import { PlayersService } from 'src/players/players.service';
 import { GamesService } from 'src/games/games.service';
 import { ActionTargetsService } from 'src/action-targets/action-targets.service';
+import { ValidationUtils } from 'src/common/utils/validation.utils';
 
 @Injectable()
 export class ActionsService {
@@ -57,15 +58,15 @@ export class ActionsService {
 
     for (const targetId of targets) {
       const target = await this.playersService.findOne(targetId);
+
       if (!target) {
         throw new NotFoundException('Target not found');
       }
-      const actionTarget = await this.actionTargetsService.create({
-        action,
+
+      await this.actionTargetsService.create({
+        actionId: action.id,
         targetId,
       });
-
-      action.targets.push(actionTarget);
     }
 
     return this.actionsRepository.save(action);
@@ -88,55 +89,12 @@ export class ActionsService {
     return action;
   }
 
-  async update(id: number, updateActionInput: UpdateActionInput) {
-    const { gameId, actorId, targets, actionTypeId, round, order } =
-      updateActionInput;
-
-    const action = await this.findOne(id);
-    if (!action) {
-      throw new NotFoundException('Action not found');
-    }
-
-    if (gameId) {
-      const game = await this.gamesService.findOne(gameId);
-      if (!game) {
-        throw new NotFoundException('Game not found');
-      }
-      action.game = game;
-    }
-
-    if (actorId) {
-      const actor = await this.playersService.findOne(actorId);
-      if (!actor) {
-        throw new NotFoundException('Actor not found');
-      }
-      action.actor = actor;
-    }
-
-    if (actionTypeId) {
-      const actionType = await this.actionTypesService.findOne(actionTypeId);
-      if (!actionType) {
-        throw new NotFoundException('Action type not found');
-      }
-      action.actionType = actionType;
-    }
-
-    if (round) {
-      action.round = round;
-    }
-
-    if (order) {
-      action.order = order;
-    }
-
-    return this.actionsRepository.save(action);
-  }
-
   async remove(id: number) {
     const action = await this.findOne(id);
     if (!action) {
       throw new NotFoundException('Action not found');
     }
-    return this.actionsRepository.delete(id);
+    const result = await this.actionsRepository.delete(id);
+    return { success: ValidationUtils.isSuccessResult(result) };
   }
 }

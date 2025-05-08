@@ -9,6 +9,8 @@ import { Role } from './entities/role.entity';
 import { FindManyOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleActionsService } from 'src/role-actions/role-actions.service';
+import { BooleanResponse } from 'src/common/dto/boolean-response.output';
+import { ValidationUtils } from 'src/common/utils/validation.utils';
 
 @Injectable()
 export class RolesService {
@@ -29,15 +31,14 @@ export class RolesService {
     }
 
     const role = this.rolesRepository.create({ name });
+    const savedRole = await this.rolesRepository.save(role);
 
-    for (const actionId of actionIds) {
-      await this.roleActionsService.create({
-        roleId: role.id,
-        actionTypeId: actionId,
-      });
+    if (actionIds && actionIds.length > 0) {
+      const updatedRole = await this.manageRoleActions(savedRole, actionIds);
+      return updatedRole;
     }
 
-    return this.rolesRepository.save(role);
+    return savedRole;
   }
 
   findAll(
@@ -83,45 +84,61 @@ export class RolesService {
       role.name = name;
     }
 
-    if (Array.isArray(actionIds) && actionIds.length > 0) {
-      const existingActionIds = new Set(
-        role.actions.map(action => action.actionTypeId),
-      );
-      const actionsToAdd = actionIds.filter(id => !existingActionIds.has(id));
-      const actionsToRemove = role.actions.filter(
-        action => !actionIds.includes(action.actionTypeId),
-      );
-
-      if (actionsToRemove.length > 0) {
-        await this.roleActionsService.removeBatch(
-          actionsToRemove.map(action => action.id),
-        );
-        role.actions = role.actions.filter(
-          action => !actionsToRemove.includes(action),
-        );
-      }
-
-      if (actionsToAdd.length > 0) {
-        const newActions = await Promise.all(
-          actionsToAdd.map(actionId =>
-            this.roleActionsService.create({
-              roleId: role.id,
-              actionTypeId: actionId,
-            }),
-          ),
-        );
-        role.actions.push(...newActions);
-      }
+    if (actionIds && actionIds.length > 0) {
+      const updatedRole = await this.manageRoleActions(role, actionIds);
+      return updatedRole;
     }
 
     return this.rolesRepository.save(role);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<BooleanResponse> {
     const role = await this.findOne(id);
     if (!role) {
       throw new NotFoundException('Role not found');
     }
-    return this.rolesRepository.delete(id);
+    const result = await this.rolesRepository.delete(id);
+    return { success: ValidationUtils.isSuccessResult(result) };
+  }
+
+  async manageRoleActions(role: Role, actionIds: number[]) {
+    if (!role.actions) {
+      role.actions = [];
+    }
+
+    const existingActionIds = new Set(
+      role.actions.map(action => action.actionTypeId),
+    );
+    const actionsToAdd = actionIds.filter(id => !existingActionIds.has(id));
+    const actionsToRemove = role.actions.filter(
+      action => !actionIds.includes(action.actionTypeId),
+    );
+
+    if (!actionsToRemove.length && !actionsToAdd.length) {
+      return role;
+    }
+
+    if (actionsToRemove.length > 0) {
+      await this.roleActionsService.removeBatch(
+        actionsToRemove.map(action => action.id),
+      );
+      role.actions = role.actions.filter(
+        action => !actionsToRemove.includes(action),
+      );
+    }
+
+    if (actionsToAdd.length > 0) {
+      const newActions = await Promise.all(
+        actionsToAdd.map(actionId =>
+          this.roleActionsService.create({
+            roleId: role.id,
+            actionTypeId: actionId,
+          }),
+        ),
+      );
+      role.actions.push(...newActions);
+    }
+
+    return this.rolesRepository.save(role);
   }
 }

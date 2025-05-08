@@ -14,15 +14,11 @@ export class Role {
   @Column({ unique: true })
   name: string;
 
-  @Field(() => [RoleAction], { nullable: true })
-  @OneToMany(() => RoleAction, roleAction => roleAction.role, {
-    nullable: true,
-  })
+  @Field(() => [RoleAction], { defaultValue: [] })
+  @OneToMany(() => RoleAction, roleAction => roleAction.role)
   actions: RoleAction[];
 
-  @Field(() => [GameTypeRole], { nullable: true })
-  @OneToMany(() => GameTypeRole, gameTypeRole => gameTypeRole.role, {
-    nullable: true,
-  })
+  @Field(() => [GameTypeRole], { defaultValue: [] })
+  @OneToMany(() => GameTypeRole, gameTypeRole => gameTypeRole.role)
   gameTypeRoles: GameTypeRole[];
 }

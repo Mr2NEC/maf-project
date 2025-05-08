@@ -3,6 +3,7 @@ import { RolesService } from './roles.service';
 import { Role } from './entities/role.entity';
 import { CreateRoleInput } from './dto/create-role.input';
 import { UpdateRoleInput } from './dto/update-role.input';
+import { BooleanResponse } from 'src/common/dto/boolean-response.output';
 
 @Resolver(() => Role)
 export class RolesResolver {
@@ -29,7 +30,7 @@ export class RolesResolver {
   }
 
   @Mutation(() => Role, { name: 'removeRole' })
-  remove(@Args('id', { type: () => Int }) id: number) {
+  async remove(@Args('id', { type: () => Int }) id: number) {
     return this.rolesService.remove(id);
   }
 }

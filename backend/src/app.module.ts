@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { join } from 'path';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { PlayersModule } from './players/players.module';
@@ -22,9 +21,7 @@ import { ActionTypesModule } from './action-types/action-types.module';
 import { ActionTargetsModule } from './action-targets/action-targets.module';
 import { GameTypesModule } from './game-types/game-types.module';
 import { GameTypeRolesModule } from './game-type-roles/game-type-roles.module';
-import { SharedModule } from './shared/shared.module';
-
-console.log(process.env);
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -43,13 +40,28 @@ console.log(process.env);
         database: configService.get<string>('database.name'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: configService.get<boolean>('database.synchronize'),
+        autoLoadEntities: true,
+        verboseRetryLog: true,
+        extra: {
+          connectionLimit: 5,
+        },
       }),
       inject: [ConfigService],
     }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      sortSchema: true,
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        debug: configService.get<boolean>('graphql.debug'),
+        playground: configService.get<boolean>('graphql.playground'),
+        introspection: configService.get<boolean>('graphql.introspection'),
+        autoSchemaFile: configService.get<string>('graphql.autoSchemaFile'),
+        sortSchema: configService.get<boolean>('graphql.sortSchema'),
+        path: configService.get<string>('graphql.path'),
+        cors: configService.get<boolean>('graphql.cors'),
+        context: configService.get<boolean>('graphql.context'),
+      }),
+      inject: [ConfigService],
     }),
     PlayersModule,
     RolesModule,
@@ -66,8 +78,7 @@ console.log(process.env);
     ActionsModule,
     ActionTypesModule,
     ActionTargetsModule,
-
-    SharedModule,
+    CommonModule,
   ],
 })
 export class AppModule {}

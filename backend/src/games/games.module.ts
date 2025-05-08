@@ -5,7 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Game } from './entities/game.entity';
 import { GameTypesModule } from 'src/game-types/game-types.module';
 import { PlayersModule } from 'src/players/players.module';
-import { DateUtils } from 'src/shared/utils/date.utils';
 
 @Module({
   imports: [
@@ -13,7 +12,7 @@ import { DateUtils } from 'src/shared/utils/date.utils';
     GameTypesModule,
     forwardRef(() => PlayersModule),
   ],
-  providers: [GamesResolver, GamesService, DateUtils],
+  providers: [GamesResolver, GamesService],
   exports: [GamesService],
 })
 export class GamesModule {}

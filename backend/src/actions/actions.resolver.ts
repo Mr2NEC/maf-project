@@ -23,11 +23,6 @@ export class ActionsResolver {
     return this.actionsService.findOne(id);
   }
 
-  @Mutation(() => Action, { name: 'updateAction' })
-  update(@Args('id') id: number, @Args('data') data: UpdateActionInput) {
-    return this.actionsService.update(id, { ...data });
-  }
-
   @Mutation(() => Action, { name: 'removeAction' })
   remove(@Args('id', { type: () => Int }) id: number) {
     return this.actionsService.remove(id);
