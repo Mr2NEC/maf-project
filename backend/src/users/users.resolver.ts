@@ -29,8 +29,11 @@ export class UsersResolver {
 
   @UseGuards(GqlJwtGuard)
   @Mutation(() => User, { name: 'updateUser' })
-  update(@Args('data') input: UpdateUserInput) {
-    return this.usersService.update(input.id, input);
+  update(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('input') input: UpdateUserInput,
+  ) {
+    return this.usersService.update(id, input);
   }
 
   @Mutation(() => Boolean, { name: 'removeUser' })

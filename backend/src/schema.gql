@@ -30,6 +30,12 @@ type ActionType {
   updatedAt: DateTime!
 }
 
+type AuthPayload {
+  accessToken: String!
+  role: UserRole!
+  userId: Int!
+}
+
 type Club {
   id: Float!
   imgSrc: String!
@@ -111,10 +117,9 @@ input CreateSocialInput {
 }
 
 input CreateUserInput {
-  birthdate: DateTime
   clubId: Int
-  firstName: String!
-  lastName: String!
+  email: String!
+  password: String!
   socials: [CreateSocialInput!]
   username: String
 }
@@ -170,19 +175,20 @@ type Mutation {
   createGame(data: CreateGameInput!): Game!
   createGameType(data: CreateGameTypeInput!): GameType!
   createRole(data: CreateRoleInput!): Role!
-  createUser(data: CreateUserInput!): User!
   deleteGame(id: Float!): Game!
   initializeDatabaseClubs: String!
   removeAction(id: Int!): Action!
   removeActionType(id: Int!): ActionType!
   removeGameType(id: Int!): GameType!
   removeRole(id: Int!): Role!
-  removeUser(id: Int!): User!
+  removeUser(id: Int!): Boolean!
+  signIn(input: SignInInput!): AuthPayload!
+  signup(input: CreateUserInput!): User!
   updateActionType(data: UpdateActionTypeInput!): ActionType!
   updateGame(data: UpdateGameInput!, id: Float!): Game!
   updateGameType(data: UpdateGameTypeInput!, id: Float!): GameType!
   updateRole(data: UpdateRoleInput!): Role!
-  updateUser(data: UpdateUserInput!): User!
+  updateUser(id: Int!, input: UpdateUserInput!): User!
 }
 
 type Place {
@@ -201,6 +207,14 @@ type Player {
   user: User!
   userId: Int!
   username: String!
+}
+
+type Profile {
+  birthdate: DateTime
+  firstName: String
+  id: ID!
+  lastName: String
+  user: User!
 }
 
 type Query {
@@ -246,6 +260,11 @@ type RoleAction {
   roleId: Int!
 }
 
+input SignInInput {
+  email: String!
+  password: String!
+}
+
 type Social {
   club: Club
   clubId: Int
@@ -286,23 +305,32 @@ input UpdateRoleInput {
 input UpdateUserInput {
   birthdate: DateTime
   clubId: Int
+  email: String
   firstName: String
-  id: Int!
   lastName: String
+  password: String
+  role: UserRole!
   socials: [CreateSocialInput!]
   username: String
 }
 
 type User {
-  birthdate: DateTime
   club: Club
   clubId: Int
   createdAt: DateTime!
-  firstName: String!
+  email: String!
   id: ID!
-  lastName: String!
   players: [Player!]!
+  profile: Profile!
+  profileId: Int
+  role: UserRole!
   socials: [Social!]!
   updatedAt: DateTime!
-  username: String
+  username: String!
+}
+
+"""The role of a user"""
+enum UserRole {
+  ADMIN
+  USER
 }

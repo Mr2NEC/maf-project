@@ -14,10 +14,7 @@ import { UserRole } from 'src/enums/user-role.enum';
 export class UpdateUserInput extends PartialType(
   IntersectionType(CreateUserInput, CreateProfileInput),
 ) {
-  @Field(() => Int)
-  id: number;
-
   @IsEnum(UserRole)
   @Field(() => UserRole)
-  role: UserRole;
+  role?: UserRole;
 }

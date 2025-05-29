@@ -62,7 +62,7 @@ import { jwtConfig } from './config/jwt.config';
         sortSchema: configService.get<boolean>('graphql.sortSchema'),
         path: configService.get<string>('graphql.path'),
         cors: configService.get<boolean>('graphql.cors'),
-        context: configService.get<boolean>('graphql.context'),
+        context: ({ req }) => ({ req }),
       }),
       inject: [ConfigService],
     }),

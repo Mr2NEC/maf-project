@@ -8,7 +8,6 @@ export interface GraphQLConfig {
   sortSchema: boolean;
   path: string;
   cors: boolean;
-  context: boolean;
 }
 
 export const graphqlConfig = registerAs<GraphQLConfig>('graphql', () => ({
@@ -19,5 +18,4 @@ export const graphqlConfig = registerAs<GraphQLConfig>('graphql', () => ({
   sortSchema: process.env.GRAPHQL_SORT_SCHEMA === 'true',
   path: process.env.GRAPHQL_PATH || '/graphql',
   cors: process.env.GRAPHQL_CORS === 'true',
-  context: process.env.GRAPHQL_CONTEXT === 'true',
 }));

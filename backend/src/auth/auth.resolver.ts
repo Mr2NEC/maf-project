@@ -10,7 +10,7 @@ export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
   @Mutation(() => User)
-  signup(@Args('input') input: CreateUserInput) {
+  async signup(@Args('input') input: CreateUserInput) {
     return this.authService.registerUser(input);
   }
 
