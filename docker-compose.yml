@@ -37,6 +37,8 @@ services:
       GRAPHQL_SORT_SCHEMA: ${GRAPHQL_SORT_SCHEMA}
       GRAPHQL_PATH: ${GRAPHQL_PATH}
       GRAPHQL_CORS: ${GRAPHQL_CORS}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
     ports:
       - "${BACKEND_PORT}:4000"
     depends_on:

@@ -22,12 +22,15 @@ import { ActionTargetsModule } from './action-targets/action-targets.module';
 import { GameTypesModule } from './game-types/game-types.module';
 import { GameTypeRolesModule } from './game-type-roles/game-type-roles.module';
 import { CommonModule } from './common/common.module';
+import { AuthModule } from './auth/auth.module';
+import { ProfilesModule } from './profiles/profiles.module';
+import { jwtConfig } from './config/jwt.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, graphqlConfig],
+      load: [databaseConfig, graphqlConfig, jwtConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -79,6 +82,8 @@ import { CommonModule } from './common/common.module';
     ActionTypesModule,
     ActionTargetsModule,
     CommonModule,
+    AuthModule,
+    ProfilesModule,
   ],
 })
 export class AppModule {}

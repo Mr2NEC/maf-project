@@ -2,6 +2,34 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Action {
+  actionType: ActionType!
+  actionTypeId: Int!
+  actor: Player!
+  actorId: Int!
+  game: Game!
+  gameId: Int!
+  id: ID!
+  order: Int!
+  round: Int!
+  targets: [ActionTarget!]
+}
+
+type ActionTarget {
+  action: Action!
+  actionId: Int!
+  id: ID!
+  target: Player!
+  targetId: Int!
+}
+
+type ActionType {
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  updatedAt: DateTime!
+}
+
 type Club {
   id: Float!
   imgSrc: String!
@@ -10,11 +38,26 @@ type Club {
   region: String!
   socials: [Social!]!
   title: String!
+  users: [User!]!
 }
 
 type ClubOwner {
-  id: Float!
-  link: String!
+  clubs: [Club!]
+  id: ID!
+  link: String
+  name: String!
+}
+
+input CreateActionInput {
+  actionTypeId: Int!
+  actorId: Int!
+  gameId: Int!
+  order: Int!
+  round: Int!
+  targets: [Int!]!
+}
+
+input CreateActionTypeInput {
   name: String!
 }
 
@@ -32,22 +75,48 @@ input CreateClubOwnerInput {
   name: String!
 }
 
+input CreateGameInput {
+  gameTypeId: Int!
+  startDate: DateTime!
+}
+
+input CreateGameTypeInput {
+  description: String
+  gameTypeRoles: [CreateGameTypeRoleInput!]!
+  name: String!
+  playersCount: Int!
+}
+
+input CreateGameTypeRoleInput {
+  count: Int!
+  gameTypeId: Int!
+  roleId: Int!
+}
+
 input CreatePlaceInput {
   city: String!
   country: String!
 }
 
-input CreatePlayerInput {
-  birthdate: DateTime
-  description: String
-  firstName: String
-  lastName: String
-  username: String!
+input CreateRoleInput {
+  actionIds: [Int!]!
+  name: String!
 }
 
 input CreateSocialInput {
+  clubId: Int
   link: String!
   type: String!
+  userId: Int
+}
+
+input CreateUserInput {
+  birthdate: DateTime
+  clubId: Int
+  firstName: String!
+  lastName: String!
+  socials: [CreateSocialInput!]
+  username: String
 }
 
 """
@@ -55,53 +124,185 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Game {
+  actions: [Action!]!
+  createdAt: DateTime!
+  currentRound: Int!
+  gameType: GameType!
+  gameTypeId: Int!
+  id: ID!
+  players: [Player!]!
+  startDate: DateTime!
+  status: GameStatus!
+  updatedAt: DateTime!
+}
+
+"""The status of a game"""
+enum GameStatus {
+  FINISHED
+  IN_PROGRESS
+  WAITING
+}
+
+type GameType {
+  description: String
+  gameTypeRoles: [GameTypeRole!]!
+  games: [Game!]!
+  id: ID!
+  name: String!
+  playersCount: Int!
+}
+
+type GameTypeRole {
+  count: Int!
+  gameType: GameType!
+  gameTypeId: Int!
+  id: ID!
+  role: Role!
+  roleId: Int!
+}
+
 type Mutation {
+  createAction(data: CreateActionInput!): Action!
+  createActionType(data: CreateActionTypeInput!): ActionType!
   createClub(input: CreateClubInput!): Club!
   createClubOwner(input: CreateClubOwnerInput!): ClubOwner!
-  createPlayer(createPlayerInput: CreatePlayerInput!): Player!
+  createGame(data: CreateGameInput!): Game!
+  createGameType(data: CreateGameTypeInput!): GameType!
+  createRole(data: CreateRoleInput!): Role!
+  createUser(data: CreateUserInput!): User!
+  deleteGame(id: Float!): Game!
   initializeDatabaseClubs: String!
-  removePlayer(id: Float!): Boolean!
-  updatePlayer(id: Int!, updatePlayerInput: UpdatePlayerInput!): Player!
+  removeAction(id: Int!): Action!
+  removeActionType(id: Int!): ActionType!
+  removeGameType(id: Int!): GameType!
+  removeRole(id: Int!): Role!
+  removeUser(id: Int!): User!
+  updateActionType(data: UpdateActionTypeInput!): ActionType!
+  updateGame(data: UpdateGameInput!, id: Float!): Game!
+  updateGameType(data: UpdateGameTypeInput!, id: Float!): GameType!
+  updateRole(data: UpdateRoleInput!): Role!
+  updateUser(data: UpdateUserInput!): User!
 }
 
 type Place {
   city: String!
   country: String!
-  id: Float!
+  id: ID!
 }
 
 type Player {
-  birthdate: DateTime
-  createdAt: DateTime!
-  description: String
-  firstName: String
+  game: Game!
+  gameId: Int!
   id: ID!
-  lastName: String
-  socials: [Social!]!
-  updatedAt: DateTime!
+  role: Role
+  roleId: Int
+  seatNumber: Int
+  user: User!
+  userId: Int!
   username: String!
 }
 
 type Query {
+  action(id: Int!): Action!
+  actionTarget(id: Int!): ActionTarget!
+  actionTargets: [ActionTarget!]!
+  actionType(id: Int!): ActionType!
+  actionTypes: [ActionType!]!
+  actions: [Action!]!
   clubOwner: [ClubOwner!]!
   findAllClubs: [Club!]!
   findOneClub(id: Float!): Club!
+  game(id: Float!): Game!
+  gameType(id: Int!): GameType!
+  gameTypeRole(id: Int!): GameTypeRole!
+  gameTypeRoles: [GameTypeRole!]!
+  gameTypes: [GameType!]!
+  games: [Game!]!
   place: [Place!]!
   player(id: Int!): Player!
   players: [Player!]!
+  role(id: Int!): Role!
+  roleAction(id: Int!): RoleAction!
+  roleActions: [RoleAction!]!
+  roles: [Role!]!
   social: [Social!]!
+  user(id: Int!): User!
+  users: [User!]!
+}
+
+type Role {
+  actions: [RoleAction!]!
+  gameTypeRoles: [GameTypeRole!]!
+  id: Int!
+  name: String!
+}
+
+type RoleAction {
+  actionType: ActionType!
+  actionTypeId: Int!
+  id: Int!
+  role: Role!
+  roleId: Int!
 }
 
 type Social {
+  club: Club
+  clubId: Int
   id: Float!
   link: String!
   type: String!
+  user: User
+  userId: Int
 }
 
-input UpdatePlayerInput {
-  birthdate: DateTime
+input UpdateActionTypeInput {
+  id: Int!
+  name: String
+}
+
+input UpdateGameInput {
+  currentRound: Int
+  gameTypeId: Int
+  id: Int!
+  startDate: DateTime
+  status: GameStatus
+}
+
+input UpdateGameTypeInput {
   description: String
+  gameTypeRoles: [CreateGameTypeRoleInput!]
+  id: Int!
+  name: String
+  playersCount: Int
+}
+
+input UpdateRoleInput {
+  actionIds: [Int!]
+  id: Int!
+  name: String
+}
+
+input UpdateUserInput {
+  birthdate: DateTime
+  clubId: Int
   firstName: String
+  id: Int!
   lastName: String
+  socials: [CreateSocialInput!]
+  username: String
+}
+
+type User {
+  birthdate: DateTime
+  club: Club
+  clubId: Int
+  createdAt: DateTime!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  players: [Player!]!
+  socials: [Social!]!
+  updatedAt: DateTime!
   username: String
 }

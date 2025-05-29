@@ -5,9 +5,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { SocialsModule } from 'src/socials/socials.module';
 import { ClubsModule } from 'src/clubs/clubs.module';
+import { ProfilesService } from 'src/profiles/profiles.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), SocialsModule, ClubsModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    SocialsModule,
+    ClubsModule,
+    ProfilesService,
+  ],
   providers: [UsersResolver, UsersService],
   exports: [UsersService],
 })

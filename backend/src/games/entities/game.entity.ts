@@ -1,5 +1,6 @@
-import { Field, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Action } from 'src/actions/entities/action.entity';
+import { GameStatus } from 'src/enums/game-status.enum';
 import { GameType } from 'src/game-types/entities/game-type.entity';
 import { Player } from 'src/players/entities/player.entity';
 import {
@@ -12,17 +13,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
-export enum GameStatus {
-  WAITING = 'waiting',
-  IN_PROGRESS = 'in_progress',
-  FINISHED = 'finished',
-}
-
-registerEnumType(GameStatus, {
-  name: 'GameStatus',
-  description: 'The status of a game',
-});
 
 @ObjectType()
 @Entity({ name: 'games' })

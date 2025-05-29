@@ -14,11 +14,23 @@ export class SocialsService {
     return this.socialRepository.find();
   }
 
+  async findOneBy(data: Record<string, string | number>) {
+    return this.socialRepository.findOneByOrFail({ ...data });
+  }
+
   async findOneByTypeAndLink(
     type: string,
     link: string,
   ): Promise<Social | null> {
-    return this.socialRepository.findOne({ where: { type, link } });
+    return this.findOneBy({ type, link });
+  }
+
+  async findByUserId(id: number) {
+    return this.findOneBy({ userId: id });
+  }
+
+  async findByClubId(id: number) {
+    return this.findOneBy({ clubId: id });
   }
 
   async create(socialData: CreateSocialInput): Promise<Social> {

@@ -1,6 +1,6 @@
 import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 import { CreateGameInput } from './create-game.input';
-import { GameStatus } from '../entities/game.entity';
+import { GameStatus } from 'src/enums/game-status.enum';
 
 @InputType()
 export class UpdateGameInput extends PartialType(CreateGameInput) {

@@ -1,29 +1,36 @@
 import { InputType, Int, Field } from '@nestjs/graphql';
-import { IsOptional, Length, MaxDate, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+  ValidateIf,
+} from 'class-validator';
 import { CreateSocialInput } from 'src/socials/dto/create-social.input';
 
 @InputType()
 export class CreateUserInput {
   @Field(() => String, { nullable: true })
   @MaxLength(50)
-  username?: string;
+  @IsString()
+  username: string;
+
+  @IsString()
+  @IsEmail()
+  @Field()
+  email: string;
 
   @Field()
-  @IsOptional()
-  @MaxLength(30)
-  firstName: string;
-
-  @Field()
-  @IsOptional()
-  @MaxLength(30)
-  lastName: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @MaxDate(new Date())
-  birthdate?: Date;
+  @IsString()
+  @MinLength(8)
+  password: string;
 
   @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @ValidateIf(o => o.clubId !== undefined)
+  @IsInt()
   clubId?: number;
 
   @Field(() => [CreateSocialInput], { nullable: true })

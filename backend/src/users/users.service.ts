@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
-import { FindManyOptions, Repository } from 'typeorm';
+import { EntityNotFoundError, FindManyOptions, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SocialsService } from 'src/socials/socials.service';
 import { ClubsService } from 'src/clubs/clubs.service';
+import { CreateSocialInput } from 'src/socials/dto/create-social.input';
+import { ProfilesService } from 'src/profiles/profiles.service';
 
 @Injectable()
 export class UsersService {
@@ -13,44 +15,38 @@ export class UsersService {
     @InjectRepository(User) private usersRepository: Repository<User>,
     private socialsService: SocialsService,
     private clubsService: ClubsService,
+    private profileService: ProfilesService,
   ) {}
 
-  async create(data: CreateUserInput) {
-    const { lastName, firstName, username, birthdate, clubId, socials } =
-    data;
+  async create(input: CreateUserInput) {
+    const { email, username, password, clubId, socials } = input;
 
-    const user = this.usersRepository.create({
-      lastName,
-      firstName,
-      username: username ?? `${firstName} ${lastName}`,
+    const user = await this.createUser({
+      username,
+      email,
+      password,
     });
 
-    if (Array.isArray(socials) && socials.length > 0) {
-      for (const social of socials) {
-        await this.socialsService.create({
-          ...social,
-          userId: user.id,
-        });
-      }
+    const profile = await this.profileService.create({});
+    user.profile = profile;
+
+    if (Array.isArray(socials)) {
+      await this.manageUserSocials(user, socials);
     }
 
-    if (birthdate) {
-      user.birthdate = birthdate;
-    }
+    await this.manageUserClub(user, clubId);
 
-    if (clubId) {
-      const club = await this.clubsService.findOne(clubId);
-      if (club) {
-        user.clubId = club.id;
-      }
-    }
+    return this.usersRepository.save(user);
+  }
 
+  async createUser(input: CreateUserInput) {
+    const user = await this.usersRepository.create({ ...input });
     return this.usersRepository.save(user);
   }
 
   async findAll(options?: FindManyOptions<User>) {
     return this.usersRepository.find({
-      relations: ['socials', 'club'],
+      relations: ['socials', 'club', 'profile'],
       ...options,
     });
   }
@@ -58,70 +54,90 @@ export class UsersService {
   async findOne(id: number) {
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['socials', 'club'],
+      relations: ['socials', 'club', 'profile'],
     });
     if (!user) {
-      throw new Error('User not found');
+      throw new EntityNotFoundError(User, { id });
     }
     return user;
   }
 
-  async update(id: number, data: UpdateUserInput) {
-    const { lastName, firstName, username, birthdate, clubId, socials } =
-    data;
+  async findOneBy(data: Record<string, string | number>) {
+    return this.usersRepository.findOneByOrFail({ ...data });
+  }
+
+  async update(id: number, input: UpdateUserInput) {
+    const { lastName, firstName, username, birthdate, clubId, socials } = input;
 
     const user = await this.findOne(id);
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
-    if (lastName) {
-      user.lastName = lastName;
+    if (typeof username !== 'undefined') user.username = username;
+
+    if (firstName || lastName || birthdate) {
+      const profile = await this.profileService.update(user.profileId, {
+        firstName,
+        lastName,
+        birthdate,
+      });
+
+      user.profile = profile;
     }
 
-    if (firstName) {
-      user.firstName = firstName;
+    if (Array.isArray(socials)) {
+      await this.manageUserSocials(user, socials);
     }
 
-    if (username) {
-      user.username = username;
-    }
+    await this.manageUserClub(user, clubId);
 
-    if (birthdate) {
-      user.birthdate = birthdate;
-    }
-
-    if (clubId) {
-      const club = await this.clubsService.findOne(clubId);
-      if (club) {
-        user.clubId = club.id;
-      }
-    }
-
-    if (Array.isArray(socials) && socials.length > 0) {
-      for (const social of socials) {
-        const existingSocial =
-          await this.socialsService.findOneByTypeAndLink(
-            social.type,
-            social.link,
-          );
-        if (!existingSocial) {
-          await this.socialsService.create({
-            ...social,
-            userId: user.id,
-          });
-        }
-      }
-    }
-
-    return this.usersRepository.save({ ...user });
+    return this.usersRepository.save(user);
   }
 
   async remove(id: number) {
-    const user = await this.findOne(id);
-    if (!user) {
-      throw new Error('User not found');
+    const result = await this.usersRepository.delete(id);
+    return result.affected === 1;
+  }
+
+  async manageUserSocials(
+    user: User,
+    socialsArray: CreateSocialInput[],
+  ): Promise<void> {
+    if (!socialsArray.length) return;
+
+    const existingSocials = await this.socialsService.findByUserId(user.id);
+
+    const newSocials = Array.isArray(existingSocials)
+      ? socialsArray.filter(social => {
+          return !existingSocials.some(
+            existing =>
+              existing.type === social.type && existing.link === social.link,
+          );
+        })
+      : socialsArray;
+
+    await Promise.all(
+      newSocials.map(social =>
+        this.socialsService.create({
+          ...social,
+          userId: user.id,
+        }),
+      ),
+    );
+  }
+
+  async manageUserClub(user: User, clubId?: number | null): Promise<void> {
+    if (clubId === null) {
+      user.clubId = null;
+      return;
     }
-    return this.usersRepository.delete(id);
+
+    if (typeof clubId !== 'undefined') {
+      const club = await this.clubsService.findOne(clubId);
+      if (!club)
+        throw new NotFoundException(`Club with ID ${clubId} not found`);
+      user.clubId = club.id;
+    }
   }
 }

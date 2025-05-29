@@ -1,7 +1,9 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
-import { IsDate, IsOptional, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 import { Club } from 'src/clubs/entities/club.entity';
+import { UserRole } from 'src/enums/user-role.enum';
 import { Player } from 'src/players/entities/player.entity';
+import { Profile } from 'src/profiles/entities/profile.entity';
 import { Social } from 'src/socials/entities/social.entity';
 import {
   Column,
@@ -10,6 +12,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -21,45 +24,51 @@ export class User {
   @PrimaryGeneratedColumn()
   readonly id: number;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  @IsString()
-  username?: string;
-
   @Column()
   @Field()
-  @IsOptional()
   @IsString()
-  firstName: string;
+  username: string;
 
-  @Column()
   @Field()
-  @IsOptional()
-  @IsString()
-  lastName: string;
+  @Column()
+  email: string;
+
+  @Field(() => UserRole)
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role: UserRole;
 
   @Column({ nullable: true })
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsDate()
-  birthdate?: Date;
+  password: string;
 
-  @Field(() => [Social], { nullable: true })
-  @OneToMany(() => Social, social => social.user, { nullable: true })
+  @Field(() => Int, { nullable: true })
+  @Column({ name: 'profile_id', nullable: true })
+  profileId: number;
+
+  @Field(() => Profile)
+  @OneToOne(() => Profile, profile => profile.user, { cascade: true })
+  @JoinColumn()
+  profile: Profile;
+
+  @Field(() => [Social], { defaultValue: [] })
+  @OneToMany(() => Social, social => social.user)
   socials: Social[];
 
-  @Field(() => [Player], { nullable: true })
-  @OneToMany(() => Player, player => player.user, { nullable: true })
+  @Field(() => [Player], { defaultValue: [] })
+  @OneToMany(() => Player, player => player.user)
   players: Player[];
 
   @Field(() => Int, { nullable: true })
   @Column({ name: 'club_id', nullable: true })
-  clubId: number;
+  clubId: number | null;
 
   @Field(() => Club, { nullable: true })
   @ManyToOne(() => Club, club => club.users, { nullable: true })
   @JoinColumn({ name: 'club_id' })
-  club?: Club;
+  club: Club;
 
   @CreateDateColumn()
   @Field()
