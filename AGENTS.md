@@ -38,5 +38,16 @@ public website. Development plan: `ROADMAP.md`.
 - Schema changes: change the entity, then `npm run migration:generate -- src/migrations/<Name>` in
   `backend/` against a database with all previous migrations applied. Never enable `synchronize`.
 
+## Game engine (`backend/src/game-engine`)
+- Rules are pure functions in `domain/` (no DB, no Nest) with unit tests; change rules there first.
+- `GameEngineService` loads a game in a transaction with the game row locked, applies the rules,
+  writes the result. Game status, phase and round change only through it.
+- Roles and action types are data: the engine only knows `Team` and `ActionEffect`.
+  Required reference data (e.g. the VOTE action type) is created by migrations.
+- Never expose a player's role while the game runs (see `PlayersResolver.canSeeRole`).
+- e2e tests (`npm run test:e2e`) need MySQL and drop the database named in `MYSQL_DATABASE`
+  (must contain "e2e"); locally: `MYSQL_PASSWORD=<from .env.dev> npm run test:e2e` after granting the
+  dev user access once: `GRANT ALL ON maf_e2e.* TO 'maf'@'%'` (as MySQL root).
+
 ## Known gaps (see ROADMAP.md)
-No refresh tokens yet; the game engine (stage 2) does not exist.
+No refresh tokens yet; no subscriptions.

@@ -1,3 +1,4 @@
+import { GamePhase } from 'src/enums/game-phase.enum';
 import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
 import { ActionType } from 'src/action-types/entities/action-type.entity';
 import { Game } from 'src/games/entities/game.entity';
@@ -55,6 +56,10 @@ export class Action {
   @Field(() => Int)
   @Column()
   round: number;
+
+  @Field(() => GamePhase)
+  @Column({ type: 'enum', enum: GamePhase, default: GamePhase.NIGHT })
+  phase: GamePhase;
 
   @Field(() => Int)
   @Column()

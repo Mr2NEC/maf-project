@@ -14,7 +14,10 @@ describe('GamesService', () => {
   const classic = { id: 1, name: 'classic' } as GameType;
   const sport = { id: 2, name: 'sport' } as GameType;
 
-  let repository: Record<'findOne' | 'create' | 'save' | 'delete', jest.Mock>;
+  let repository: Record<
+    'findOne' | 'create' | 'save' | 'update' | 'delete',
+    jest.Mock
+  >;
   let gameTypes: jest.Mocked<Pick<GameTypesService, 'findOne'>>;
   let service: GamesService;
 
@@ -24,6 +27,7 @@ describe('GamesService', () => {
       status: GameStatus.WAITING,
       currentRound: 2,
       gameType: classic,
+      gameTypeId: 1,
       startDate: TOMORROW,
       ...overrides,
     } as Game;
@@ -37,6 +41,7 @@ describe('GamesService', () => {
       findOne: jest.fn().mockResolvedValue(storedGame()),
       create: jest.fn((data: Partial<Game>) => data),
       save: jest.fn((game: Game) => Promise.resolve(game)),
+      update: jest.fn().mockResolvedValue({ affected: 1 }),
       delete: jest.fn().mockResolvedValue({ affected: 1, raw: [] }),
     };
     gameTypes = {
@@ -90,32 +95,28 @@ describe('GamesService', () => {
 
   describe('update', () => {
     it('changes only the provided fields', async () => {
-      const game = await service.update(7, { status: GameStatus.IN_PROGRESS });
+      await service.update(7, { startDate: TOMORROW });
 
-      expect(game).toMatchObject({
-        status: GameStatus.IN_PROGRESS,
-        currentRound: 2,
-        gameType: classic,
+      expect(repository.update).toHaveBeenCalledWith(7, {
         startDate: TOMORROW,
       });
     });
 
     it('switches the game type', async () => {
-      const game = await service.update(7, { gameTypeId: 2 });
+      await service.update(7, { gameTypeId: 2 });
 
-      expect(game.gameType).toBe(sport);
+      expect(repository.update).toHaveBeenCalledWith(7, { gameTypeId: 2 });
     });
 
-    it('moves to a later round', async () => {
-      const game = await service.update(7, { currentRound: 3 });
+    it('does not edit a game that has started', async () => {
+      repository.findOne.mockResolvedValue(
+        storedGame({ status: GameStatus.IN_PROGRESS }),
+      );
 
-      expect(game.currentRound).toBe(3);
-    });
-
-    it('rejects going back to an earlier round', async () => {
-      await expect(service.update(7, { currentRound: 1 })).rejects.toThrow(
+      await expect(service.update(7, { startDate: TOMORROW })).rejects.toThrow(
         BadRequestException,
       );
+      expect(repository.update).not.toHaveBeenCalled();
     });
 
     it('rejects moving the game into the past', async () => {
@@ -126,9 +127,18 @@ describe('GamesService', () => {
   });
 
   describe('delete', () => {
-    it('returns the deleted game', async () => {
+    it('deletes a game that has not started', async () => {
       await expect(service.delete(7)).resolves.toMatchObject({ id: 7 });
       expect(repository.delete).toHaveBeenCalledWith(7);
+    });
+
+    it('keeps finished games for history', async () => {
+      repository.findOne.mockResolvedValue(
+        storedGame({ status: GameStatus.FINISHED }),
+      );
+
+      await expect(service.delete(7)).rejects.toThrow(BadRequestException);
+      expect(repository.delete).not.toHaveBeenCalled();
     });
   });
 });
