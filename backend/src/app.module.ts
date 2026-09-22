@@ -26,6 +26,7 @@ import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { GameEngineModule } from './game-engine/game-engine.module';
+import { RatingModule } from './rating/rating.module';
 import { jwtConfig } from './config/jwt.config';
 import { validateEnv } from './config/env.validation';
 import depthLimit = require('graphql-depth-limit');
@@ -108,6 +109,7 @@ const MAX_QUERY_DEPTH = 8;
     AuthModule,
     ProfilesModule,
     GameEngineModule,
+    RatingModule,
   ],
 })
 export class AppModule {}

@@ -37,8 +37,17 @@ export class PlayersResolver {
 
   @Public()
   @Query(() => [Player], { name: 'players' })
-  findAll(@Args() { skip, take }: PaginationArgs): Promise<Player[]> {
-    return this.playersService.findAll({ skip, take, order: { id: 'ASC' } });
+  findAll(
+    @Args() { skip, take }: PaginationArgs,
+    /** A user's game history, newest first */
+    @Args('userId', { type: () => Int, nullable: true }) userId?: number,
+  ): Promise<Player[]> {
+    return this.playersService.findAll({
+      where: userId === undefined ? {} : { userId },
+      skip,
+      take,
+      order: userId === undefined ? { id: 'ASC' } : { id: 'DESC' },
+    });
   }
 
   /** Hidden from players and spectators while the game is running. */

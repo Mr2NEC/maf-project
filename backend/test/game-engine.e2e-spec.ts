@@ -310,6 +310,21 @@ describe('Game engine (e2e)', () => {
       ),
     ).toHaveLength(13);
 
+    // Rating: seat 7 (town + best-move bonus) leads, mafia players have 0
+    const rating = await gql(
+      '{ rating { place points games wins user { username } } }',
+      null,
+    );
+    expect(rating.data.rating[0]).toEqual({
+      place: 1,
+      points: 1.5,
+      games: 1,
+      wins: 1,
+      user: { username: 'player7' },
+    });
+    expect(rating.data.rating).toHaveLength(10);
+    expect(rating.data.rating.at(-1).points).toBe(0);
+
     expect(code(await endNight())).toBe('BAD_REQUEST');
     expect(
       code(await gql(`mutation { deleteGame(id: ${gameId}) { id } }`)),
@@ -346,6 +361,33 @@ describe('Game engine (e2e)', () => {
     });
     const deleted = await gql(`mutation { deleteGame(id: ${gameId}) { id } }`);
     expect(Number(deleted.data.deleteGame.id)).toBe(gameId);
+  });
+
+  it('finds users by name and lists upcoming games for the calendar', async () => {
+    const found = await gql('{ users(search: "player1") { username } }', null);
+    expect(
+      found.data.users.map((u: { username: string }) => u.username),
+    ).toEqual(['player1', 'player10']);
+
+    // LIKE wildcards in the search are matched literally
+    const wildcard = await gql('{ users(search: "%") { id } }', null);
+    expect(wildcard.data.users).toEqual([]);
+    const underscore = await gql('{ users(search: "player_") { id } }', null);
+    expect(underscore.data.users).toEqual([]);
+
+    await gql(
+      'mutation { createGame(data: { gameTypeId: 1, startDate: "2031-05-01T19:00:00.000Z" }) { id } }',
+    );
+    await gql(
+      'mutation { createGame(data: { gameTypeId: 1, startDate: "2031-03-01T19:00:00.000Z" }) { id } }',
+    );
+    const upcoming = await gql(
+      '{ games(statuses: [WAITING], from: "2031-01-01T00:00:00.000Z") { startDate status } }',
+      null,
+    );
+    expect(
+      upcoming.data.games.map((g: { startDate: string }) => g.startDate),
+    ).toEqual(['2031-03-01T19:00:00.000Z', '2031-05-01T19:00:00.000Z']);
   });
 
   it('keeps regular users out of host commands', async () => {
