@@ -1,5 +1,5 @@
-import { ArgsType, Field } from '@nestjs/graphql';
-import { IsDate, IsEnum, IsOptional } from 'class-validator';
+import { ArgsType, Field, Int } from '@nestjs/graphql';
+import { IsDate, IsEnum, IsInt, IsOptional } from 'class-validator';
 import { PaginationArgs } from 'src/common/dto/pagination.args';
 import { GameStatus } from 'src/enums/game-status.enum';
 
@@ -15,4 +15,14 @@ export class GamesFilterArgs extends PaginationArgs {
   @IsOptional()
   @IsDate()
   from?: Date;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  clubId?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  tournamentId?: number;
 }

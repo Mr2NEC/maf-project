@@ -1,3 +1,5 @@
+import { Club } from 'src/clubs/entities/club.entity';
+import { Tournament } from 'src/tournaments/entities/tournament.entity';
 import { GamePhase } from 'src/enums/game-phase.enum';
 import { Team } from 'src/enums/team.enum';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
@@ -55,6 +57,28 @@ export class Game {
   @Field(() => Int)
   @Column({ name: 'game_type_id' })
   gameTypeId: number;
+
+  /** Club running the game; null for games created before clubs existed */
+  @Field(() => Int, { nullable: true })
+  @Column({ name: 'club_id', type: 'int', nullable: true })
+  clubId: number | null;
+
+  @Field(() => Club, { nullable: true })
+  @ManyToOne(() => Club, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'club_id' })
+  club: Club | null;
+
+  @Field(() => Int, { nullable: true })
+  @Column({ name: 'tournament_id', type: 'int', nullable: true })
+  tournamentId: number | null;
+
+  @Field(() => Tournament, { nullable: true })
+  @ManyToOne(() => Tournament, t => t.games, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'tournament_id' })
+  tournament: Tournament | null;
 
   @Field(() => GameType)
   @ManyToOne(() => GameType, gameType => gameType.games)

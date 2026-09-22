@@ -1,25 +1,23 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { CreateClubOwnerInput } from 'src/club-owners/dto/create-club-owner.input';
-import { CreatePlaceInput } from 'src/places/dto/create-place.input';
-import { CreateSocialInput } from 'src/socials/dto/create-social.input';
+import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 @InputType()
 export class CreateClubInput {
   @Field()
-  imgSrc: string;
-
-  @Field()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(100)
   title: string;
 
   @Field()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(100)
   region: string;
 
-  @Field(() => CreateClubOwnerInput)
-  owner: CreateClubOwnerInput;
-
-  @Field(() => CreatePlaceInput)
-  place: CreatePlaceInput;
-
-  @Field(() => [CreateSocialInput])
-  socials: CreateSocialInput[];
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  @MaxLength(5000)
+  description?: string;
 }

@@ -13,6 +13,10 @@ import { Game } from 'src/games/entities/game.entity';
 import { GamesService } from 'src/games/games.service';
 import { Player } from 'src/players/entities/player.entity';
 import { User } from 'src/users/entities/user.entity';
+import { JwtUser } from 'src/auth/types/jwt-user';
+import { ClubAccessService } from 'src/club-members/club-access.service';
+import { RatingPointsService } from 'src/rating/rating-points.service';
+import { TournamentParticipant } from 'src/tournaments/entities/tournament-participant.entity';
 import { resolveVotes } from './domain/day';
 import { resolveNight, validateNightAction } from './domain/night';
 import { FIRST_PHASE, nextPhase } from './domain/phases';
@@ -80,58 +84,83 @@ export class GameEngineService {
   constructor(
     private readonly dataSource: DataSource,
     private readonly gamesService: GamesService,
+    private readonly access: ClubAccessService,
+    private readonly ratingPoints: RatingPointsService,
   ) {}
 
   // --- Before the game -----------------------------------------------------
 
-  async addPlayer(gameId: number, input: AddPlayerInput): Promise<Game> {
-    await this.inGame(gameId, async ({ manager, game, gameType, players }) => {
-      assertStatus(game, GameStatus.WAITING);
+  async addPlayer(
+    user: JwtUser,
+    gameId: number,
+    input: AddPlayerInput,
+  ): Promise<Game> {
+    await this.inGame(
+      user,
+      gameId,
+      async ({ manager, game, gameType, players }) => {
+        assertStatus(game, GameStatus.WAITING);
 
-      if (players.length >= gameType.playersCount) {
-        throw new GameRuleError(
-          `The game already has ${gameType.playersCount} players`,
-        );
-      }
-      if (players.some(p => p.userId === input.userId)) {
-        throw new GameRuleError('This user already plays in the game');
-      }
+        if (players.length >= gameType.playersCount) {
+          throw new GameRuleError(
+            `The game already has ${gameType.playersCount} players`,
+          );
+        }
+        if (players.some(p => p.userId === input.userId)) {
+          throw new GameRuleError('This user already plays in the game');
+        }
 
-      const user = await manager.findOne(User, {
-        where: { id: input.userId },
-        select: { id: true, username: true },
-      });
-      if (!user) {
-        throw new EntityNotFoundError(User, { id: input.userId });
-      }
+        const seated = await manager.findOne(User, {
+          where: { id: input.userId },
+          select: { id: true, username: true },
+        });
+        if (!seated) {
+          throw new EntityNotFoundError(User, { id: input.userId });
+        }
+        if (
+          game.tournamentId !== null &&
+          !(await manager.existsBy(TournamentParticipant, {
+            tournamentId: game.tournamentId,
+            userId: seated.id,
+          }))
+        ) {
+          throw new GameRuleError(
+            'Only tournament participants can play this game',
+          );
+        }
 
-      const taken = new Set(players.map(p => p.seatNumber));
-      const seatNumber =
-        input.seatNumber ??
-        Array.from({ length: gameType.playersCount }, (_, i) => i + 1).find(
-          seat => !taken.has(seat),
-        );
-      if (!seatNumber || seatNumber > gameType.playersCount) {
-        throw new GameRuleError(
-          `Seat must be between 1 and ${gameType.playersCount}`,
-        );
-      }
-      if (taken.has(seatNumber)) {
-        throw new GameRuleError(`Seat ${seatNumber} is taken`);
-      }
+        const taken = new Set(players.map(p => p.seatNumber));
+        const seatNumber =
+          input.seatNumber ??
+          Array.from({ length: gameType.playersCount }, (_, i) => i + 1).find(
+            seat => !taken.has(seat),
+          );
+        if (!seatNumber || seatNumber > gameType.playersCount) {
+          throw new GameRuleError(
+            `Seat must be between 1 and ${gameType.playersCount}`,
+          );
+        }
+        if (taken.has(seatNumber)) {
+          throw new GameRuleError(`Seat ${seatNumber} is taken`);
+        }
 
-      await manager.insert(Player, {
-        gameId,
-        userId: user.id,
-        username: user.username,
-        seatNumber,
-      });
-    });
+        await manager.insert(Player, {
+          gameId,
+          userId: seated.id,
+          username: seated.username,
+          seatNumber,
+        });
+      },
+    );
     return this.gamesService.findOne(gameId);
   }
 
-  async removePlayer(gameId: number, playerId: number): Promise<Game> {
-    await this.inGame(gameId, async ({ manager, game, players }) => {
+  async removePlayer(
+    user: JwtUser,
+    gameId: number,
+    playerId: number,
+  ): Promise<Game> {
+    await this.inGame(user, gameId, async ({ manager, game, players }) => {
       assertStatus(game, GameStatus.WAITING);
       this.playerOf(players, playerId);
       await manager.delete(Player, { id: playerId });
@@ -139,69 +168,82 @@ export class GameEngineService {
     return this.gamesService.findOne(gameId);
   }
 
-  async assignRoles(gameId: number, input: AssignRolesInput): Promise<Game> {
-    await this.inGame(gameId, async ({ manager, game, gameType, players }) => {
-      assertStatus(game, GameStatus.WAITING);
+  async assignRoles(
+    user: JwtUser,
+    gameId: number,
+    input: AssignRolesInput,
+  ): Promise<Game> {
+    await this.inGame(
+      user,
+      gameId,
+      async ({ manager, game, gameType, players }) => {
+        assertStatus(game, GameStatus.WAITING);
 
-      const playerIds = players.map(p => p.id);
-      const composition = gameType.gameTypeRoles.map(r => ({
-        roleId: r.roleId,
-        count: r.count,
-      }));
-      if (playerIds.length !== gameType.playersCount) {
-        throw new GameRuleError(
-          `The game needs ${gameType.playersCount} players, ${playerIds.length} registered`,
-        );
-      }
-
-      let assignment: RoleAssignment;
-      if (input.random) {
-        assignment = distributeRoles(playerIds, composition, this.random);
-      } else {
-        if (!input.assignments) {
-          throw new GameRuleError('Pass assignments or set random to true');
+        const playerIds = players.map(p => p.id);
+        const composition = gameType.gameTypeRoles.map(r => ({
+          roleId: r.roleId,
+          count: r.count,
+        }));
+        if (playerIds.length !== gameType.playersCount) {
+          throw new GameRuleError(
+            `The game needs ${gameType.playersCount} players, ${playerIds.length} registered`,
+          );
         }
-        assignment = new Map(
-          input.assignments.map(a => [a.playerId, a.roleId]),
-        );
-        validateManualAssignment(playerIds, assignment, composition);
-      }
 
-      for (const [playerId, roleId] of assignment) {
-        await manager.update(Player, { id: playerId }, { roleId });
-      }
-    });
+        let assignment: RoleAssignment;
+        if (input.random) {
+          assignment = distributeRoles(playerIds, composition, this.random);
+        } else {
+          if (!input.assignments) {
+            throw new GameRuleError('Pass assignments or set random to true');
+          }
+          assignment = new Map(
+            input.assignments.map(a => [a.playerId, a.roleId]),
+          );
+          validateManualAssignment(playerIds, assignment, composition);
+        }
+
+        for (const [playerId, roleId] of assignment) {
+          await manager.update(Player, { id: playerId }, { roleId });
+        }
+      },
+    );
     return this.gamesService.findOne(gameId);
   }
 
-  async startGame(gameId: number): Promise<Game> {
-    await this.inGame(gameId, async ({ manager, game, gameType, players }) => {
-      assertStatus(game, GameStatus.WAITING);
-      if (players.length !== gameType.playersCount) {
-        throw new GameRuleError(
-          `The game needs ${gameType.playersCount} players, ${players.length} registered`,
-        );
-      }
-      if (players.some(p => !p.roleId)) {
-        throw new GameRuleError('Assign roles before starting the game');
-      }
+  async startGame(user: JwtUser, gameId: number): Promise<Game> {
+    await this.inGame(
+      user,
+      gameId,
+      async ({ manager, game, gameType, players }) => {
+        assertStatus(game, GameStatus.WAITING);
+        if (players.length !== gameType.playersCount) {
+          throw new GameRuleError(
+            `The game needs ${gameType.playersCount} players, ${players.length} registered`,
+          );
+        }
+        if (players.some(p => !p.roleId)) {
+          throw new GameRuleError('Assign roles before starting the game');
+        }
 
-      await manager.update(Game, gameId, {
-        status: GameStatus.IN_PROGRESS,
-        phase: FIRST_PHASE.phase,
-        currentRound: FIRST_PHASE.round,
-      });
-    });
+        await manager.update(Game, gameId, {
+          status: GameStatus.IN_PROGRESS,
+          phase: FIRST_PHASE.phase,
+          currentRound: FIRST_PHASE.round,
+        });
+      },
+    );
     return this.gamesService.findOne(gameId);
   }
 
   // --- Night ---------------------------------------------------------------
 
   async recordNightAction(
+    user: JwtUser,
     gameId: number,
     input: NightActionInput,
   ): Promise<Action> {
-    const actionId = await this.inGame(gameId, async ctx => {
+    const actionId = await this.inGame(user, gameId, async ctx => {
       const { manager, game, players } = ctx;
       assertPhase(game, GamePhase.NIGHT);
 
@@ -259,8 +301,12 @@ export class GameEngineService {
   }
 
   /** Lets the host fix a mistake before the night is resolved. */
-  async removeNightAction(gameId: number, actionId: number): Promise<boolean> {
-    return this.inGame(gameId, async ({ manager, game }) => {
+  async removeNightAction(
+    user: JwtUser,
+    gameId: number,
+    actionId: number,
+  ): Promise<boolean> {
+    return this.inGame(user, gameId, async ({ manager, game }) => {
       assertPhase(game, GamePhase.NIGHT);
       const result = await manager.delete(Action, {
         id: actionId,
@@ -277,8 +323,8 @@ export class GameEngineService {
     });
   }
 
-  async endNight(gameId: number): Promise<NightResult> {
-    const outcome = await this.inGame(gameId, async ctx => {
+  async endNight(user: JwtUser, gameId: number): Promise<NightResult> {
+    const outcome = await this.inGame(user, gameId, async ctx => {
       const { manager, game, players } = ctx;
       assertPhase(game, GamePhase.NIGHT);
 
@@ -316,8 +362,12 @@ export class GameEngineService {
 
   // --- Day -----------------------------------------------------------------
 
-  async endDay(gameId: number, input: EndDayInput): Promise<DayResult> {
-    const outcome = await this.inGame(gameId, async ctx => {
+  async endDay(
+    user: JwtUser,
+    gameId: number,
+    input: EndDayInput,
+  ): Promise<DayResult> {
+    const outcome = await this.inGame(user, gameId, async ctx => {
       const { manager, game, players } = ctx;
       assertPhase(game, GamePhase.DAY);
 
@@ -362,8 +412,12 @@ export class GameEngineService {
   // --- Any time ------------------------------------------------------------
 
   /** Reaching the game type's foul limit disqualifies the player. */
-  async addFoul(gameId: number, playerId: number): Promise<Game> {
-    await this.inGame(gameId, async ctx => {
+  async addFoul(
+    user: JwtUser,
+    gameId: number,
+    playerId: number,
+  ): Promise<Game> {
+    await this.inGame(user, gameId, async ctx => {
       const { manager, game, gameType, players } = ctx;
       assertStatus(game, GameStatus.IN_PROGRESS);
 
@@ -397,8 +451,8 @@ export class GameEngineService {
     return this.gamesService.findOne(gameId);
   }
 
-  async cancelGame(gameId: number): Promise<Game> {
-    await this.inGame(gameId, async ({ manager, game }) => {
+  async cancelGame(user: JwtUser, gameId: number): Promise<Game> {
+    await this.inGame(user, gameId, async ({ manager, game }) => {
       if (ENDED.includes(game.status)) {
         throw new GameRuleError(`The game is already ${game.status}`);
       }
@@ -412,17 +466,20 @@ export class GameEngineService {
   }
 
   /** Extra points from the host after the game, e.g. for the best move. */
-  async awardBonus(gameId: number, input: AwardBonusInput): Promise<Game> {
-    await this.inGame(gameId, async ({ manager, game, players }) => {
+  async awardBonus(
+    user: JwtUser,
+    gameId: number,
+    input: AwardBonusInput,
+  ): Promise<Game> {
+    await this.inGame(user, gameId, async ({ manager, game, players }) => {
       assertStatus(game, GameStatus.FINISHED);
       const player = this.playerOf(players, input.playerId);
       await manager.update(
         Player,
         { id: player.id },
-        {
-          points: Math.round((player.points + input.points) * 100) / 100,
-        },
+        { bonus: Math.round((player.bonus + input.points) * 100) / 100 },
       );
+      await this.recalculatePoints(manager, game);
     });
     return this.gamesService.findOne(gameId);
   }
@@ -430,6 +487,7 @@ export class GameEngineService {
   // --- Helpers -------------------------------------------------------------
 
   private inGame<T>(
+    user: JwtUser,
     gameId: number,
     work: (ctx: GameContext) => Promise<T>,
   ): Promise<T> {
@@ -442,6 +500,8 @@ export class GameEngineService {
       if (!game) {
         throw new EntityNotFoundError(Game, { id: gameId });
       }
+      // Club hosts run club games; platform hosts run games without a club
+      await this.access.assertCanHost(user, game.clubId, manager);
 
       const gameType = await manager.findOneOrFail(GameType, {
         where: { id: game.gameTypeId },
@@ -544,9 +604,9 @@ export class GameEngineService {
     });
   }
 
-  /** Winners get 1 point; bonus points are added later by the host. */
+  /** Points follow the club's rating rules; bonuses are added later by the host. */
   private async finish(
-    { manager, game, players }: GameContext,
+    { manager, game }: GameContext,
     winner: Team,
   ): Promise<void> {
     await manager.update(Game, game.id, {
@@ -555,13 +615,14 @@ export class GameEngineService {
       phase: null,
       finishedAt: new Date(),
     });
+    await this.recalculatePoints(manager, game);
+  }
 
-    const winnerIds = players
-      .filter(p => p.role?.team === winner)
-      .map(p => p.id);
-    await manager.update(Player, { gameId: game.id }, { points: 0 });
-    if (winnerIds.length) {
-      await manager.update(Player, { id: In(winnerIds) }, { points: 1 });
-    }
+  private async recalculatePoints(
+    manager: EntityManager,
+    game: Game,
+  ): Promise<void> {
+    const rules = await this.ratingPoints.rulesFor(game.clubId, manager);
+    await this.ratingPoints.recalculate(rules, { gameId: game.id }, manager);
   }
 }

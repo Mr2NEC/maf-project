@@ -70,14 +70,27 @@ type CheckOutcome {
 }
 
 type Club {
-  id: Float!
-  imgSrc: String!
-  owner: ClubOwner!
-  place: Place!
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  imgSrc: String
+  owner: ClubOwner
+  place: Place
+  ratingRules: RatingRules!
   region: String!
   socials: [Social!]!
   title: String!
-  users: [User!]!
+}
+
+type ClubMember {
+  club: Club!
+  clubId: Int!
+  createdAt: DateTime!
+  id: ID!
+  role: ClubRole!
+  status: MembershipStatus!
+  user: User!
+  userId: Int!
 }
 
 type ClubOwner {
@@ -87,6 +100,12 @@ type ClubOwner {
   name: String!
 }
 
+enum ClubRole {
+  ADMIN
+  HOST
+  MEMBER
+}
+
 input CreateActionTypeInput {
   effect: ActionEffect! = NOTE
   name: String!
@@ -94,11 +113,8 @@ input CreateActionTypeInput {
 }
 
 input CreateClubInput {
-  imgSrc: String!
-  owner: CreateClubOwnerInput!
-  place: CreatePlaceInput!
+  description: String
   region: String!
-  socials: [CreateSocialInput!]!
   title: String!
 }
 
@@ -108,8 +124,10 @@ input CreateClubOwnerInput {
 }
 
 input CreateGameInput {
+  clubId: Int
   gameTypeId: Int!
   startDate: DateTime!
+  tournamentId: Int
 }
 
 input CreateGameTypeInput {
@@ -125,11 +143,6 @@ input CreateGameTypeRoleInput {
   roleId: Int!
 }
 
-input CreatePlaceInput {
-  city: String!
-  country: String!
-}
-
 input CreateRoleInput {
   actionIds: [Int!]!
   name: String!
@@ -141,6 +154,14 @@ input CreateSocialInput {
   link: String!
   type: String!
   userId: Int
+}
+
+input CreateTournamentInput {
+  clubId: Int!
+  description: String
+  endDate: DateTime
+  name: String!
+  startDate: DateTime!
 }
 
 """
@@ -162,6 +183,8 @@ input EndDayInput {
 
 type Game {
   actions: [Action!]!
+  club: Club
+  clubId: Int
   createdAt: DateTime!
   currentRound: Int!
   finishedAt: DateTime
@@ -172,6 +195,8 @@ type Game {
   players: [Player!]!
   startDate: DateTime!
   status: GameStatus!
+  tournament: Tournament
+  tournamentId: Int
   updatedAt: DateTime!
   winnerTeam: Team
 }
@@ -208,9 +233,16 @@ type GameTypeRole {
   roleId: Int!
 }
 
+enum MembershipStatus {
+  ACTIVE
+  PENDING
+}
+
 type Mutation {
   addFoul(gameId: Int!, playerId: Int!): Game!
   addPlayerToGame(gameId: Int!, input: AddPlayerInput!): Game!
+  addTournamentParticipant(tournamentId: Int!, userId: Int!): [TournamentParticipant!]!
+  approveClubMember(memberId: Int!): ClubMember!
   assignRoles(gameId: Int!, input: AssignRolesInput!): Game!
   awardBonus(gameId: Int!, input: AwardBonusInput!): Game!
   cancelGame(gameId: Int!): Game!
@@ -220,24 +252,34 @@ type Mutation {
   createGame(data: CreateGameInput!): Game!
   createGameType(data: CreateGameTypeInput!): GameType!
   createRole(data: CreateRoleInput!): Role!
+  createTournament(input: CreateTournamentInput!): Tournament!
   deleteGame(id: Float!): Game!
+  deleteTournament(id: Int!): Boolean!
   endDay(gameId: Int!, input: EndDayInput!): DayResult!
   endNight(gameId: Int!): NightResult!
+  joinClub(clubId: Int!): ClubMember!
+  leaveClub(clubId: Int!): Boolean!
   recordNightAction(gameId: Int!, input: NightActionInput!): Action!
   removeActionType(id: Int!): ActionType!
+  removeClubMember(memberId: Int!): Boolean!
   removeGameType(id: Int!): GameType!
   removeNightAction(actionId: Int!, gameId: Int!): Boolean!
   removePlayerFromGame(gameId: Int!, playerId: Int!): Game!
   removeRole(id: Int!): Role!
+  removeTournamentParticipant(tournamentId: Int!, userId: Int!): [TournamentParticipant!]!
   removeUser(id: Int!): Boolean!
+  setClubMemberRole(memberId: Int!, role: ClubRole!): ClubMember!
   setUserRole(id: Int!, role: UserRole!): User!
   signIn(input: SignInInput!): AuthPayload!
   signup(input: SignUpInput!): User!
   startGame(gameId: Int!): Game!
   updateActionType(data: UpdateActionTypeInput!): ActionType!
+  updateClub(id: Int!, input: UpdateClubInput!): Club!
   updateGame(data: UpdateGameInput!, id: Float!): Game!
   updateGameType(data: UpdateGameTypeInput!, id: Float!): GameType!
+  updateRatingRules(clubId: Int!, rules: RatingRulesInput!): Club!
   updateRole(data: UpdateRoleInput!): Role!
+  updateTournament(id: Int!, input: UpdateTournamentInput!): Tournament!
   updateUser(id: Int!, input: UpdateUserInput!): User!
 }
 
@@ -262,6 +304,7 @@ type Place {
 }
 
 type Player {
+  bonus: Float!
   eliminatedRound: Int
   fouls: Int!
   game: Game!
@@ -299,25 +342,29 @@ type Query {
   actionType(id: Int!): ActionType!
   actionTypes: [ActionType!]!
   actions(gameId: Int, skip: Int! = 0, take: Int! = 50): [Action!]!
+  club(id: Int!): Club!
+  clubMembers(clubId: Int!, status: MembershipStatus! = ACTIVE): [ClubMember!]!
   clubOwner: [ClubOwner!]!
-  findAllClubs(skip: Int! = 0, take: Int! = 50): [Club!]!
-  findOneClub(id: Float!): Club!
+  clubs(search: String, skip: Int! = 0, take: Int! = 50): [Club!]!
   game(id: Float!): Game!
   gameType(id: Int!): GameType!
   gameTypeRole(id: Int!): GameTypeRole!
   gameTypeRoles: [GameTypeRole!]!
   gameTypes: [GameType!]!
-  games(from: DateTime, skip: Int! = 0, statuses: [GameStatus!], take: Int! = 50): [Game!]!
+  games(clubId: Int, from: DateTime, skip: Int! = 0, statuses: [GameStatus!], take: Int! = 50, tournamentId: Int): [Game!]!
   me: User!
+  myClubs: [ClubMember!]!
   place: [Place!]!
   player(id: Int!): Player!
   players(skip: Int! = 0, take: Int! = 50, userId: Int): [Player!]!
-  rating(from: DateTime, skip: Int! = 0, take: Int! = 50, to: DateTime): [RatingEntry!]!
+  rating(clubId: Int, from: DateTime, skip: Int! = 0, take: Int! = 50, to: DateTime): [RatingEntry!]!
   role(id: Int!): Role!
   roleAction(id: Int!): RoleAction!
   roleActions: [RoleAction!]!
   roles: [Role!]!
   social: [Social!]!
+  tournament(id: Int!): Tournament!
+  tournaments(clubId: Int, skip: Int! = 0, statuses: [TournamentStatus!], take: Int! = 50): [Tournament!]!
   user(id: Int!): User!
   users(search: String, skip: Int! = 0, take: Int! = 50): [User!]!
 }
@@ -329,6 +376,24 @@ type RatingEntry {
   user: User!
   winRate: Float!
   wins: Int!
+}
+
+type RatingRules {
+  bonusEnabled: Boolean!
+  lossPoints: Float!
+  mafiaWinPoints: Float!
+  minGames: Int!
+  neutralWinPoints: Float!
+  townWinPoints: Float!
+}
+
+input RatingRulesInput {
+  bonusEnabled: Boolean!
+  lossPoints: Float!
+  mafiaWinPoints: Float!
+  minGames: Int!
+  neutralWinPoints: Float!
+  townWinPoints: Float!
 }
 
 type Role {
@@ -385,11 +450,53 @@ enum TieBreak {
   KEEP_ALL
 }
 
+type Tournament {
+  club: Club!
+  clubId: Int!
+  createdAt: DateTime!
+  description: String
+  endDate: DateTime
+  games: [Game!]!
+  id: ID!
+  name: String!
+  participants: [TournamentParticipant!]!
+  standings: [TournamentStanding!]!
+  startDate: DateTime!
+  status: TournamentStatus!
+}
+
+type TournamentParticipant {
+  id: ID!
+  tournamentId: Int!
+  user: User!
+  userId: Int!
+}
+
+type TournamentStanding {
+  games: Int!
+  place: Int!
+  points: Float!
+  user: User!
+  wins: Int!
+}
+
+enum TournamentStatus {
+  ACTIVE
+  FINISHED
+  PLANNED
+}
+
 input UpdateActionTypeInput {
   effect: ActionEffect = NOTE
   id: Int!
   name: String
   phase: GamePhase
+}
+
+input UpdateClubInput {
+  description: String
+  region: String
+  title: String
 }
 
 input UpdateGameInput {
@@ -410,6 +517,14 @@ input UpdateRoleInput {
   id: Int!
   name: String
   team: Team = TOWN
+}
+
+input UpdateTournamentInput {
+  description: String
+  endDate: DateTime
+  name: String
+  startDate: DateTime
+  status: TournamentStatus
 }
 
 input UpdateUserInput {
