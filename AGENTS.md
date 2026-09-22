@@ -30,6 +30,13 @@ public website. Development plan: `ROADMAP.md`.
   `@/i18n/navigation`, not from `next/link`.
 - Stories live next to components: `components/**/<name>.stories.tsx`.
 
-## Known gaps (see ROADMAP.md, stage 1)
-Most GraphQL mutations have no auth guard yet, and there are no migrations (`synchronize` in dev).
-Do not deploy to production before stage 1 is done.
+## Auth model
+- Every resolver requires a JWT unless marked `@Public()` (global guards in `auth/auth.module.ts`).
+- Restrict with `@Roles(UserRole.ADMIN)` or `@Roles(UserRole.HOST)`; admins pass every role check.
+- Ownership checks (e.g. `updateUser`) live in the resolver; get the caller with `@CurrentUser()`.
+- New list queries take `@Args() pagination: PaginationArgs`.
+- Schema changes: `npm run migration:generate -- src/migrations/<Name>` in `backend/`.
+
+## Known gaps (see ROADMAP.md)
+No initial migration yet (`synchronize` in dev), no refresh tokens.
+Do not deploy to production before the initial migration exists.
