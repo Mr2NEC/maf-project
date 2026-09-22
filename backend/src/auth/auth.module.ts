@@ -1,29 +1,43 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { UsersModule } from 'src/users/users.module';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
-import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { GqlThrottlerGuard } from './guards/gql-throttler.guard';
+import { GqlJwtGuard } from './guards/gql-jwt-guard/gql-jwt.guard';
+import { RolesGuard } from './guards/roles/roles.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/users/entities/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    UsersModule,
+    // Generous global limit; auth mutations set a stricter one via @Throttle
+    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 300 }]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('jwt.secret'),
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.getOrThrow<string>('jwt.secret'),
         signOptions: {
-          // Validated format like '60m' (see config/jwt.config.ts)
-          expiresIn: configService.get<string>(
+          // Format is validated by validateEnv, e.g. '15m'
+          expiresIn: configService.getOrThrow<string>(
             'jwt.expiresIn',
           ) as JwtSignOptions['expiresIn'],
         },
       }),
     }),
   ],
-  providers: [AuthResolver, AuthService, JwtStrategy],
+  providers: [
+    AuthResolver,
+    AuthService,
+    JwtStrategy,
+    // Order matters: rate limit, then authenticate, then authorize
+    { provide: APP_GUARD, useClass: GqlThrottlerGuard },
+    { provide: APP_GUARD, useClass: GqlJwtGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
 })
 export class AuthModule {}

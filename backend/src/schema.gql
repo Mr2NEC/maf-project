@@ -95,7 +95,7 @@ input CreateGameTypeInput {
 
 input CreateGameTypeRoleInput {
   count: Int!
-  gameTypeId: Int!
+  gameTypeId: Int
   roleId: Int!
 }
 
@@ -114,14 +114,6 @@ input CreateSocialInput {
   link: String!
   type: String!
   userId: Int
-}
-
-input CreateUserInput {
-  clubId: Int
-  email: String!
-  password: String!
-  socials: [CreateSocialInput!]
-  username: String
 }
 
 """
@@ -176,14 +168,14 @@ type Mutation {
   createGameType(data: CreateGameTypeInput!): GameType!
   createRole(data: CreateRoleInput!): Role!
   deleteGame(id: Float!): Game!
-  initializeDatabaseClubs: String!
   removeAction(id: Int!): Action!
   removeActionType(id: Int!): ActionType!
   removeGameType(id: Int!): GameType!
   removeRole(id: Int!): Role!
   removeUser(id: Int!): Boolean!
+  setUserRole(id: Int!, role: UserRole!): User!
   signIn(input: SignInInput!): AuthPayload!
-  signup(input: CreateUserInput!): User!
+  signup(input: SignUpInput!): User!
   updateActionType(data: UpdateActionTypeInput!): ActionType!
   updateGame(data: UpdateGameInput!, id: Float!): Game!
   updateGameType(data: UpdateGameTypeInput!, id: Float!): GameType!
@@ -223,26 +215,27 @@ type Query {
   actionTargets: [ActionTarget!]!
   actionType(id: Int!): ActionType!
   actionTypes: [ActionType!]!
-  actions: [Action!]!
+  actions(skip: Int! = 0, take: Int! = 50): [Action!]!
   clubOwner: [ClubOwner!]!
-  findAllClubs: [Club!]!
+  findAllClubs(skip: Int! = 0, take: Int! = 50): [Club!]!
   findOneClub(id: Float!): Club!
   game(id: Float!): Game!
   gameType(id: Int!): GameType!
   gameTypeRole(id: Int!): GameTypeRole!
   gameTypeRoles: [GameTypeRole!]!
   gameTypes: [GameType!]!
-  games: [Game!]!
+  games(skip: Int! = 0, take: Int! = 50): [Game!]!
+  me: User!
   place: [Place!]!
   player(id: Int!): Player!
-  players: [Player!]!
+  players(skip: Int! = 0, take: Int! = 50): [Player!]!
   role(id: Int!): Role!
   roleAction(id: Int!): RoleAction!
   roleActions: [RoleAction!]!
   roles: [Role!]!
   social: [Social!]!
   user(id: Int!): User!
-  users: [User!]!
+  users(skip: Int! = 0, take: Int! = 50): [User!]!
 }
 
 type Role {
@@ -265,6 +258,12 @@ input SignInInput {
   password: String!
 }
 
+input SignUpInput {
+  email: String!
+  password: String!
+  username: String!
+}
+
 type Social {
   club: Club
   clubId: Int
@@ -283,7 +282,6 @@ input UpdateActionTypeInput {
 input UpdateGameInput {
   currentRound: Int
   gameTypeId: Int
-  id: Int!
   startDate: DateTime
   status: GameStatus
 }
@@ -304,12 +302,8 @@ input UpdateRoleInput {
 
 input UpdateUserInput {
   birthdate: DateTime
-  clubId: Int
-  email: String
   firstName: String
   lastName: String
-  password: String
-  role: UserRole!
   socials: [CreateSocialInput!]
   username: String
 }
@@ -318,7 +312,7 @@ type User {
   club: Club
   clubId: Int
   createdAt: DateTime!
-  email: String!
+  email: String
   id: ID!
   players: [Player!]!
   profile: Profile!
@@ -332,5 +326,6 @@ type User {
 """The role of a user"""
 enum UserRole {
   ADMIN
+  HOST
   USER
 }

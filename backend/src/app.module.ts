@@ -7,12 +7,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { PlayersModule } from './players/players.module';
 import { graphqlConfig } from './config/graphql.config';
-import { databaseConfig } from './config/database.config';
+import { DatabaseConfig, databaseConfig } from './config/database.config';
+import { buildTypeOrmOptions } from './config/typeorm.options';
 import { PlacesModule } from './places/places.module';
 import { ClubsModule } from './clubs/clubs.module';
 import { ClubOwnersModule } from './club-owners/club-owners.module';
 import { SocialsModule } from './socials/socials.module';
-import { DataInitializerModule } from './data-initializer/data-initializer.module';
 import { GamesModule } from './games/games.module';
 import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
@@ -26,37 +26,55 @@ import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { jwtConfig } from './config/jwt.config';
+import { validateEnv } from './config/env.validation';
+import depthLimit = require('graphql-depth-limit');
+import { LoggerModule } from 'nestjs-pino';
+import { formatGraphQLError } from './common/graphql/format-error';
+
+// Deep nesting (game -> players -> user -> players -> ...) is a cheap DoS vector
+const MAX_QUERY_DEPTH = 8;
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, graphqlConfig, jwtConfig],
+      validate: validateEnv,
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+        transport:
+          process.env.NODE_ENV === 'production'
+            ? undefined
+            : { target: 'pino-pretty', options: { singleLine: true } },
+        redact: ['req.headers.authorization', 'req.headers.cookie'],
+      },
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get<string>('database.host'),
-        port: configService.get<number>('database.port'),
-        username: configService.get<string>('database.username'),
-        password: configService.get<string>('database.password'),
-        database: configService.get<string>('database.name'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get<boolean>('database.synchronize'),
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        ...buildTypeOrmOptions(
+          configService.getOrThrow<DatabaseConfig>('database'),
+        ),
         autoLoadEntities: true,
         verboseRetryLog: true,
-        extra: {
-          connectionLimit: 5,
-        },
+        // Apply pending migrations on startup
+        migrationsRun: true,
       }),
-      inject: [ConfigService],
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         debug: configService.get<boolean>('graphql.debug'),
+        formatError: (formatted, error) =>
+          formatGraphQLError(
+            formatted,
+            configService.get<boolean>('graphql.debug') ?? false,
+            error,
+          ),
+        validationRules: [depthLimit(MAX_QUERY_DEPTH)],
         // GraphQL Playground is not compatible with Apollo Server 5; use Apollo Sandbox instead
         playground: false,
         plugins: configService.get<boolean>('graphql.playground')
@@ -67,7 +85,7 @@ import { jwtConfig } from './config/jwt.config';
         sortSchema: configService.get<boolean>('graphql.sortSchema'),
         path: configService.get<string>('graphql.path'),
         cors: configService.get<boolean>('graphql.cors'),
-        context: ({ req }) => ({ req }),
+        context: ({ req, res }) => ({ req, res }),
       }),
       inject: [ConfigService],
     }),
@@ -80,7 +98,6 @@ import { jwtConfig } from './config/jwt.config';
     ClubsModule,
     ClubOwnersModule,
     SocialsModule,
-    DataInitializerModule,
     GamesModule,
     UsersModule,
     ActionsModule,

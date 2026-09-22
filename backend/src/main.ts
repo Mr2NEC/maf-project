@@ -1,13 +1,18 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { EntityNotFoundFilter } from './entity-not-found/entity-not-found.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const logger = app.get(Logger);
+  app.useLogger(logger);
   app.useGlobalFilters(new EntityNotFoundFilter());
   app.useGlobalPipes(new ValidationPipe());
+  app.enableShutdownHooks();
+
   await app.listen(process.env.BACKEND_PORT ?? 4000);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  logger.log(`Application is running on: ${await app.getUrl()}`);
 }
 void bootstrap();
