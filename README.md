@@ -91,3 +91,7 @@ Other commands: `make db-up`, `make backend-up`, `make frontend-up`, `make logs`
 - Replace `synchronize` with TypeORM migrations
 - Unit tests for services and e2e tests for the API
 - Health checks for the Docker services
+
+## Author
+
+Vladyslav Shpylka - [LinkedIn](https://www.linkedin.com/in/vshpylka/) · [GitHub](https://github.com/Mr2NEC)
