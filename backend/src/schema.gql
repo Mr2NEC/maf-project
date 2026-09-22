@@ -11,8 +11,18 @@ type Action {
   gameId: Int!
   id: ID!
   order: Int!
+  phase: GamePhase!
   round: Int!
   targets: [ActionTarget!]
+}
+
+enum ActionEffect {
+  BLOCK
+  CHECK
+  HEAL
+  KILL
+  NOTE
+  VOTE
 }
 
 type ActionTarget {
@@ -25,15 +35,38 @@ type ActionTarget {
 
 type ActionType {
   createdAt: DateTime!
+  effect: ActionEffect!
   id: ID!
   name: String!
+  phase: GamePhase
   updatedAt: DateTime!
+}
+
+input AddPlayerInput {
+  seatNumber: Int
+  userId: Int!
+}
+
+input AssignRolesInput {
+  assignments: [RoleAssignmentInput!]
+  random: Boolean! = false
 }
 
 type AuthPayload {
   accessToken: String!
   role: UserRole!
   userId: Int!
+}
+
+input AwardBonusInput {
+  playerId: Int!
+  points: Float!
+}
+
+type CheckOutcome {
+  actor: Player!
+  target: Player!
+  team: Team
 }
 
 type Club {
@@ -54,17 +87,10 @@ type ClubOwner {
   name: String!
 }
 
-input CreateActionInput {
-  actionTypeId: Int!
-  actorId: Int!
-  gameId: Int!
-  order: Int!
-  round: Int!
-  targets: [Int!]!
-}
-
 input CreateActionTypeInput {
+  effect: ActionEffect! = NOTE
   name: String!
+  phase: GamePhase
 }
 
 input CreateClubInput {
@@ -107,6 +133,7 @@ input CreatePlaceInput {
 input CreateRoleInput {
   actionIds: [Int!]!
   name: String!
+  team: Team! = TOWN
 }
 
 input CreateSocialInput {
@@ -121,21 +148,42 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type DayResult {
+  eliminated: [Player!]!
+  game: Game!
+  tie: Boolean!
+  tiedPlayers: [Player!]!
+}
+
+input EndDayInput {
+  tieBreak: TieBreak
+  votes: [VoteInput!]!
+}
+
 type Game {
   actions: [Action!]!
   createdAt: DateTime!
   currentRound: Int!
+  finishedAt: DateTime
   gameType: GameType!
   gameTypeId: Int!
   id: ID!
+  phase: GamePhase
   players: [Player!]!
   startDate: DateTime!
   status: GameStatus!
   updatedAt: DateTime!
+  winnerTeam: Team
+}
+
+enum GamePhase {
+  DAY
+  NIGHT
 }
 
 """The status of a game"""
 enum GameStatus {
+  CANCELLED
   FINISHED
   IN_PROGRESS
   WAITING
@@ -146,6 +194,7 @@ type GameType {
   gameTypeRoles: [GameTypeRole!]!
   games: [Game!]!
   id: ID!
+  maxFouls: Int!
   name: String!
   playersCount: Int!
 }
@@ -160,7 +209,11 @@ type GameTypeRole {
 }
 
 type Mutation {
-  createAction(data: CreateActionInput!): Action!
+  addFoul(gameId: Int!, playerId: Int!): Game!
+  addPlayerToGame(gameId: Int!, input: AddPlayerInput!): Game!
+  assignRoles(gameId: Int!, input: AssignRolesInput!): Game!
+  awardBonus(gameId: Int!, input: AwardBonusInput!): Game!
+  cancelGame(gameId: Int!): Game!
   createActionType(data: CreateActionTypeInput!): ActionType!
   createClub(input: CreateClubInput!): Club!
   createClubOwner(input: CreateClubOwnerInput!): ClubOwner!
@@ -168,19 +221,38 @@ type Mutation {
   createGameType(data: CreateGameTypeInput!): GameType!
   createRole(data: CreateRoleInput!): Role!
   deleteGame(id: Float!): Game!
-  removeAction(id: Int!): Action!
+  endDay(gameId: Int!, input: EndDayInput!): DayResult!
+  endNight(gameId: Int!): NightResult!
+  recordNightAction(gameId: Int!, input: NightActionInput!): Action!
   removeActionType(id: Int!): ActionType!
   removeGameType(id: Int!): GameType!
+  removeNightAction(actionId: Int!, gameId: Int!): Boolean!
+  removePlayerFromGame(gameId: Int!, playerId: Int!): Game!
   removeRole(id: Int!): Role!
   removeUser(id: Int!): Boolean!
   setUserRole(id: Int!, role: UserRole!): User!
   signIn(input: SignInInput!): AuthPayload!
   signup(input: SignUpInput!): User!
+  startGame(gameId: Int!): Game!
   updateActionType(data: UpdateActionTypeInput!): ActionType!
   updateGame(data: UpdateGameInput!, id: Float!): Game!
   updateGameType(data: UpdateGameTypeInput!, id: Float!): GameType!
   updateRole(data: UpdateRoleInput!): Role!
   updateUser(id: Int!, input: UpdateUserInput!): User!
+}
+
+input NightActionInput {
+  actionTypeId: Int!
+  actorId: Int!
+  targetId: Int!
+}
+
+type NightResult {
+  blocked: [Player!]!
+  checks: [CheckOutcome!]!
+  game: Game!
+  killed: [Player!]!
+  saved: [Player!]!
 }
 
 type Place {
@@ -190,15 +262,26 @@ type Place {
 }
 
 type Player {
+  eliminatedRound: Int
+  fouls: Int!
   game: Game!
   gameId: Int!
   id: ID!
+  points: Float!
   role: Role
   roleId: Int
   seatNumber: Int
+  status: PlayerStatus!
   user: User!
   userId: Int!
   username: String!
+}
+
+enum PlayerStatus {
+  ALIVE
+  DISQUALIFIED
+  KILLED
+  VOTED_OUT
 }
 
 type Profile {
@@ -215,7 +298,7 @@ type Query {
   actionTargets: [ActionTarget!]!
   actionType(id: Int!): ActionType!
   actionTypes: [ActionType!]!
-  actions(skip: Int! = 0, take: Int! = 50): [Action!]!
+  actions(gameId: Int, skip: Int! = 0, take: Int! = 50): [Action!]!
   clubOwner: [ClubOwner!]!
   findAllClubs(skip: Int! = 0, take: Int! = 50): [Club!]!
   findOneClub(id: Float!): Club!
@@ -243,6 +326,7 @@ type Role {
   gameTypeRoles: [GameTypeRole!]!
   id: Int!
   name: String!
+  team: Team!
 }
 
 type RoleAction {
@@ -250,6 +334,11 @@ type RoleAction {
   actionTypeId: Int!
   id: Int!
   role: Role!
+  roleId: Int!
+}
+
+input RoleAssignmentInput {
+  playerId: Int!
   roleId: Int!
 }
 
@@ -274,16 +363,28 @@ type Social {
   userId: Int
 }
 
+enum Team {
+  MAFIA
+  NEUTRAL
+  TOWN
+}
+
+"""How to settle a tie in the day vote"""
+enum TieBreak {
+  ELIMINATE_ALL
+  KEEP_ALL
+}
+
 input UpdateActionTypeInput {
+  effect: ActionEffect = NOTE
   id: Int!
   name: String
+  phase: GamePhase
 }
 
 input UpdateGameInput {
-  currentRound: Int
   gameTypeId: Int
   startDate: DateTime
-  status: GameStatus
 }
 
 input UpdateGameTypeInput {
@@ -298,6 +399,7 @@ input UpdateRoleInput {
   actionIds: [Int!]
   id: Int!
   name: String
+  team: Team = TOWN
 }
 
 input UpdateUserInput {
@@ -328,4 +430,9 @@ enum UserRole {
   ADMIN
   HOST
   USER
+}
+
+input VoteInput {
+  targetId: Int!
+  voterIds: [Int!]!
 }
