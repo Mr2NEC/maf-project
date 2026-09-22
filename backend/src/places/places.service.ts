@@ -6,7 +6,9 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class PlacesService {
-  constructor(@InjectRepository(Place) private placesRepository: Repository<Place>) {}
+  constructor(
+    @InjectRepository(Place) private placesRepository: Repository<Place>,
+  ) {}
 
   async findAll(): Promise<Place[]> {
     return this.placesRepository.find({ relations: ['clubs'] });
@@ -16,7 +18,10 @@ export class PlacesService {
     country: string,
     city: string,
   ): Promise<Place | null> {
-    return this.placesRepository.findOne({ where: { country, city }, relations: ['clubs'] });
+    return this.placesRepository.findOne({
+      where: { country, city },
+      relations: ['clubs'],
+    });
   }
 
   async create(data: CreatePlaceInput): Promise<Place> {

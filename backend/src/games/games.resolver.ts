@@ -6,7 +6,7 @@ import { UpdateGameInput } from './dto/update-game.input';
 
 @Resolver()
 export class GamesResolver {
-  constructor(private readonly gamesService: GamesService) {} 
+  constructor(private readonly gamesService: GamesService) {}
 
   @Query(() => [Game], { name: 'games' })
   async findAll() {

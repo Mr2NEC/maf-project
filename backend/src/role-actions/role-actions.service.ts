@@ -25,7 +25,7 @@ export class RoleActionsService {
       );
     }
 
-    const roleAction = await this.roleActionsRepository.create({
+    const roleAction = this.roleActionsRepository.create({
       roleId,
       actionTypeId,
     });

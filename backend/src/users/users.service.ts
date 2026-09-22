@@ -40,7 +40,7 @@ export class UsersService {
   }
 
   async createUser(input: CreateUserInput) {
-    const user = await this.usersRepository.create({ ...input });
+    const user = this.usersRepository.create({ ...input });
     return this.usersRepository.save(user);
   }
 

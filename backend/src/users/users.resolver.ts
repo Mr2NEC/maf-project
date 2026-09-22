@@ -42,7 +42,7 @@ export class UsersResolver {
   }
 
   @ResolveField('profile')
-  async profile(@Parent() user: User) {
-    return await user.profile;
+  profile(@Parent() user: User) {
+    return user.profile;
   }
 }
