@@ -1,24 +1,26 @@
-import { notFound } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ReactNode } from "react";
+import { notFound } from "next/navigation";
+import { hasLocale } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { routing } from "@/i18n/routing";
 import { BaseLayout } from "@/components/shared";
-import { Locale } from "@/i18n/config";
 
-type LocaleLayoutProps = {
+type Props = {
   children: ReactNode;
-  params: { locale: Locale };
+  params: Promise<{ locale: string }>;
 };
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export async function generateMetadata({
-  params,
-}: Omit<LocaleLayoutProps, "children">) {
+export async function generateMetadata({ params }: Omit<Props, "children">) {
   const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
   const t = await getTranslations({ locale, namespace: "locale-layout" });
 
   return {
@@ -34,13 +36,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function LocaleLayout({
-  children,
-  params,
-}: LocaleLayoutProps) {
+export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params;
-  // Ensure that the incoming `locale` is valid
-  if (!routing.locales.includes(locale as Locale)) {
+  if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
 

@@ -1,11 +1,11 @@
 "use client";
 
+import clsx from "clsx";
 import { useSelectedLayoutSegment } from "next/navigation";
-import { ComponentProps, FC } from "react";
-import { Link } from "@/i18n/routing";
+import { ComponentProps } from "react";
+import { Link } from "@/i18n/navigation";
 
-export const NavigationLink: FC<ComponentProps<typeof Link>> = (props) => {
-  const { href, ...rest } = props;
+export function NavigationLink({ href, ...rest }: ComponentProps<typeof Link>) {
   const selectedLayoutSegment = useSelectedLayoutSegment();
   const pathname = selectedLayoutSegment ? `/${selectedLayoutSegment}` : "/";
   const isActive = pathname === href;
@@ -13,9 +13,12 @@ export const NavigationLink: FC<ComponentProps<typeof Link>> = (props) => {
   return (
     <Link
       aria-current={isActive ? "page" : undefined}
-      className="flex h-[48px] grow items-center justify-center gap-2 rounded-md p-3 text-sm font-medium md:flex-none md:justify-start md:p-2 md:px-3"
+      className={clsx(
+        "inline-block px-2 py-3 transition-colors",
+        isActive ? "text-white" : "text-gray-400 hover:text-gray-200"
+      )}
       href={href}
       {...rest}
     />
   );
-};
+}

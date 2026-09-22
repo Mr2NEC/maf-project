@@ -1,4 +1,12 @@
-export const APP_HEADER_LINKS: Array<{ href: string; name: string }> = [
+import { Messages } from "next-intl";
+import { routing } from "@/i18n/routing";
+
+type AppPathname = keyof typeof routing.pathnames;
+
+export const APP_HEADER_LINKS: ReadonlyArray<{
+  href: AppPathname;
+  name: keyof Messages["navigation"];
+}> = [
   {
     href: "/about",
     name: "about",

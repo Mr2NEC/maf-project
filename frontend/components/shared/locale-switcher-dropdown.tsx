@@ -11,10 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui";
-
-import { usePathname, useRouter } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
-import { Locale } from "@/i18n/config";
+import { Locale } from "next-intl";
 
 type LocaleSwitcherDropdownProps = {
   value: string;

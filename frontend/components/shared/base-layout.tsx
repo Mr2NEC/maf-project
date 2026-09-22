@@ -1,7 +1,6 @@
 import { clsx } from "clsx";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
 import { FC, ReactNode } from "react";
 import { ThemeProvider } from "next-themes";
 import Navigation from "./navigation";
@@ -21,10 +20,7 @@ type BaseLayoutProps = {
   locale: string;
 };
 
-export const BaseLayout: FC<BaseLayoutProps> = async (props) => {
-  const { children, locale } = props;
-  const messages = await getMessages();
-
+export const BaseLayout: FC<BaseLayoutProps> = ({ children, locale }) => {
   return (
     <html className="h-full" lang={locale} suppressHydrationWarning>
       <body
@@ -34,7 +30,8 @@ export const BaseLayout: FC<BaseLayoutProps> = async (props) => {
           "flex h-full flex-col antialiased"
         )}
       >
-        <NextIntlClientProvider messages={messages}>
+        {/* Since next-intl v4 the provider inherits messages from i18n/request.ts */}
+        <NextIntlClientProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
