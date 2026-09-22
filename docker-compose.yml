@@ -74,6 +74,8 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      # Keep the dev server output apart from builds run on the host
+      - /app/.next
 
 networks:
   app-network-dev:
