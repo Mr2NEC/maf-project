@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { firstValueFrom } from 'rxjs';
 import { ClubsService } from 'src/clubs/clubs.service';
-import { CreateClubInput } from 'src/clubs/dto/create-club.input';
+import { ImportClubInput } from 'src/clubs/dto/import-club.input';
 
 const UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'clubs');
 
@@ -16,7 +16,7 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
   'image/svg+xml': 'svg',
 };
 
-type ClubSeed = CreateClubInput & { id?: number | string };
+type ClubSeed = ImportClubInput & { id?: number | string };
 
 /** Keeps names like "Mafia Club #1" safe for the file system (no ../ tricks). */
 export function toSafeFileName(name: string): string {
@@ -84,7 +84,7 @@ export class DataInitializerService {
           `${club.title}_${id ?? created}`,
         );
       }
-      await this.clubsService.create(club);
+      await this.clubsService.importClub(club);
       created++;
     }
 

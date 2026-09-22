@@ -6,6 +6,7 @@ import { Player } from 'src/players/entities/player.entity';
 import { User } from 'src/users/entities/user.entity';
 import { RatingArgs } from './dto/rating.args';
 import { RatingEntry } from './dto/rating-entry';
+import { RatingPointsService } from './rating-points.service';
 
 interface RatingRow {
   userId: number;
@@ -22,9 +23,16 @@ export class RatingService {
     private readonly playersRepository: Repository<Player>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly ratingPoints: RatingPointsService,
   ) {}
 
-  async rating({ from, to, skip, take }: RatingArgs): Promise<RatingEntry[]> {
+  async rating({
+    from,
+    to,
+    skip,
+    take,
+    clubId,
+  }: RatingArgs): Promise<RatingEntry[]> {
     const query = this.playersRepository
       .createQueryBuilder('player')
       .innerJoin('player.game', 'game', 'game.status = :finished', {
@@ -51,6 +59,14 @@ export class RatingService {
     }
     if (to) {
       query.andWhere('game.finishedAt < :to', { to });
+    }
+    if (clubId !== undefined) {
+      // A club's rating: only its games, and only players with enough of them
+      query.andWhere('game.clubId = :clubId', { clubId });
+      const rules = await this.ratingPoints.rulesFor(clubId);
+      if (rules.minGames > 0) {
+        query.having('COUNT(*) >= :minGames', { minGames: rules.minGames });
+      }
     }
 
     const rows = await query.getRawMany<RatingRow>();

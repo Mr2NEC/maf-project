@@ -44,10 +44,15 @@ export class Player {
   @Column({ default: 0 })
   fouls: number;
 
-  /** Points for this game: 1 for a win plus bonus points from the host */
+  /** Rating points for this game under the club's rating rules */
   @Field(() => Float)
   @Column({ type: 'float', default: 0 })
   points: number;
+
+  /** Extra points from the host, e.g. for the best move */
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
+  bonus: number;
 
   @Field(() => Int, { nullable: true })
   @Column({ name: 'role_id', nullable: true })

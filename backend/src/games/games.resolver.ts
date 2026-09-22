@@ -1,13 +1,14 @@
-import { GamesFilterArgs } from './dto/games-filter.args';
-import { Public } from 'src/auth/decorators/public.decorator';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { UserRole } from 'src/enums/user-role.enum';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { GamesService } from './games.service';
-import { Game } from './entities/game.entity';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { Public } from 'src/auth/decorators/public.decorator';
+import { JwtUser } from 'src/auth/types/jwt-user';
 import { CreateGameInput } from './dto/create-game.input';
+import { GamesFilterArgs } from './dto/games-filter.args';
 import { UpdateGameInput } from './dto/update-game.input';
+import { Game } from './entities/game.entity';
+import { GamesService } from './games.service';
 
+/** Club hosts manage their club's games; see ClubAccessService.assertCanHost. */
 @Resolver()
 export class GamesResolver {
   constructor(private readonly gamesService: GamesService) {}
@@ -20,25 +21,26 @@ export class GamesResolver {
 
   @Public()
   @Query(() => Game, { name: 'game' })
-  async findOne(@Args('id') id: number) {
+  findOne(@Args('id') id: number) {
     return this.gamesService.findOne(id);
   }
 
-  @Roles(UserRole.HOST)
   @Mutation(() => Game, { name: 'createGame' })
-  async create(@Args('data') data: CreateGameInput) {
-    return this.gamesService.create(data);
+  create(@CurrentUser() user: JwtUser, @Args('data') data: CreateGameInput) {
+    return this.gamesService.create(user, data);
   }
 
-  @Roles(UserRole.HOST)
   @Mutation(() => Game, { name: 'updateGame' })
-  async update(@Args('id') id: number, @Args('data') data: UpdateGameInput) {
-    return this.gamesService.update(id, data);
+  update(
+    @CurrentUser() user: JwtUser,
+    @Args('id') id: number,
+    @Args('data') data: UpdateGameInput,
+  ) {
+    return this.gamesService.update(user, id, data);
   }
 
-  @Roles(UserRole.HOST)
   @Mutation(() => Game, { name: 'deleteGame' })
-  async delete(@Args('id') id: number) {
-    return this.gamesService.delete(id);
+  delete(@CurrentUser() user: JwtUser, @Args('id') id: number) {
+    return this.gamesService.delete(user, id);
   }
 }

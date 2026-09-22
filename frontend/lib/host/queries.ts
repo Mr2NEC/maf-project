@@ -4,6 +4,13 @@ export const HostGamesQuery = graphql(`
   query HostGames {
     active: games(statuses: [WAITING, IN_PROGRESS], take: 100) {
       id
+      clubId
+      club {
+        title
+      }
+      tournament {
+        name
+      }
       status
       phase
       currentRound
@@ -16,8 +23,9 @@ export const HostGamesQuery = graphql(`
         id
       }
     }
-    finished: games(statuses: [FINISHED], take: 10) {
+    finished: games(statuses: [FINISHED], take: 30) {
       id
+      clubId
       startDate
       winnerTeam
       gameType {
@@ -28,6 +36,11 @@ export const HostGamesQuery = graphql(`
       id
       name
       playersCount
+    }
+    tournaments(statuses: [PLANNED, ACTIVE], take: 100) {
+      id
+      clubId
+      name
     }
   }
 `);

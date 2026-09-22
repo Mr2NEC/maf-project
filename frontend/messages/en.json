@@ -12,12 +12,12 @@
   },
   "navigation": {
     "about": "About us",
-    "blog": "Blog",
+    "clubs": "Clubs",
     "calendar": "Calendar",
-    "contacts": "Contacts",
+    "tournaments": "Tournaments",
     "players": "Players",
     "rating": "Rating",
-    "tournaments": "Tournaments"
+    "contacts": "Contacts"
   },
   "locale-switcher": {
     "label": "Change language",
@@ -39,8 +39,116 @@
     "title": "Calendar",
     "description": "Upcoming and running games"
   },
-  "tournaments-page": {
-    "title": "Tournaments page"
+  "clubs": {
+    "title": "Clubs",
+    "search": "Search by name or city",
+    "find": "Find",
+    "empty": "No clubs found",
+    "new-club": "New club",
+    "name": "Name",
+    "region": "City or region",
+    "description": "Description",
+    "create": "Create club",
+    "sign-in-to-create": "Sign in to create a club",
+    "request-sent": "Request sent",
+    "save": "Save",
+    "saved": "Saved"
+  },
+  "club-role": {
+    "MEMBER": "Member",
+    "HOST": "Host",
+    "ADMIN": "Admin"
+  },
+  "club-page": {
+    "since": "since {date}",
+    "join": "Join the club",
+    "request-pending": "Your request is waiting for a club admin",
+    "cancel-request": "Cancel request",
+    "leave": "Leave the club",
+    "leave-confirm": "Leave this club?",
+    "host-panel": "Host panel",
+    "manage": "Manage club",
+    "games": "Upcoming games",
+    "rating": "Club rating",
+    "full-rating": "Full club rating",
+    "tournaments": "Tournaments",
+    "members": "Members ({count, number})"
+  },
+  "club-manage": {
+    "title": "Manage club",
+    "members-title": "Members",
+    "rating-rules": "Rating rules",
+    "new-tournament": "New tournament",
+    "club-info": "About the club",
+    "requests": "Join requests ({count, number})",
+    "no-requests": "No new requests",
+    "approve": "Accept",
+    "reject": "Decline",
+    "members": "Members ({count, number})",
+    "player": "Player",
+    "joined": "Joined",
+    "role": "Role",
+    "remove": "Remove",
+    "remove-confirm": "Remove {name} from the club?"
+  },
+  "rating-rules": {
+    "fields": {
+      "townWinPoints": "Points for a town win",
+      "mafiaWinPoints": "Points for a mafia win",
+      "neutralWinPoints": "Points for a maniac win",
+      "lossPoints": "Points for a loss",
+      "minGames": "Games needed to appear in the rating",
+      "bonusEnabled": "Count bonus points from the host"
+    },
+    "recalculate-hint": "Saving recalculates the points of every finished club game.",
+    "save": "Save rules",
+    "saved": "Rules saved, points recalculated",
+    "summary": {
+      "wins": "A win gives {town} (town), {mafia} (mafia), {neutral} (maniac)",
+      "loss": "A loss gives {points}",
+      "bonus-on": "Bonus points from the host count",
+      "bonus-off": "Bonus points from the host do not count",
+      "min-games": "Players need {count, plural, one {# game} other {# games}} to appear in the rating",
+      "ties": "Ties are broken by wins, then by fewer games"
+    }
+  },
+  "tournaments": {
+    "title": "Tournaments",
+    "lead": "A tournament is a series of club games; the standings sum the points of all its games.",
+    "current": "Current and upcoming",
+    "finished": "Finished",
+    "empty": "No tournaments yet",
+    "status": {
+      "PLANNED": "Planned",
+      "ACTIVE": "Running",
+      "FINISHED": "Finished"
+    },
+    "name": "Name",
+    "start-date": "Start",
+    "end-date": "End",
+    "description": "Description",
+    "create": "Create tournament"
+  },
+  "tournament-page": {
+    "standings": "Standings",
+    "no-standings": "No participants or finished games yet",
+    "player": "Player",
+    "points": "Points",
+    "games": "Games",
+    "wins": "Wins",
+    "no-games": "No games yet. Create them in the host panel.",
+    "manage": "Manage tournament",
+    "set-status": {
+      "ACTIVE": "Start the tournament",
+      "FINISHED": "Finish the tournament"
+    },
+    "delete": "Delete tournament",
+    "delete-confirm": "Delete this tournament?",
+    "participants": "Participants ({count, number})",
+    "search-player": "Player nickname",
+    "search": "Find",
+    "add": "Add",
+    "remove": "Remove"
   },
   "players-page": {
     "title": "Players",
@@ -75,10 +183,10 @@
       "year": "This year",
       "month": "This month"
     },
-    "rules": "1 point for a win plus bonus points from the host. Ties are broken by wins, then by fewer games."
-  },
-  "blog-page": {
-    "title": "Blog page"
+    "rules": "Each club counts points under its own rules. Pick a club to see its rules and its rating.",
+    "club": "Club",
+    "all-clubs": "All clubs",
+    "show": "Show"
   },
   "contacts-page": {
     "title": "Contacts page"
@@ -190,7 +298,9 @@
     "nobody-voted-out": "Nobody was voted out",
     "bonus-player": "Bonus to",
     "bonus-points": "Points",
-    "add-bonus": "Add bonus"
+    "add-bonus": "Add bonus",
+    "where": "Club or tournament",
+    "no-club": "Without a club"
   },
   "games": {
     "no-upcoming": "No games scheduled yet",

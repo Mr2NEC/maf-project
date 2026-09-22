@@ -1,3 +1,5 @@
+import { ClubMembersModule } from 'src/club-members/club-members.module';
+import { Tournament } from 'src/tournaments/entities/tournament.entity';
 import { Module, forwardRef } from '@nestjs/common';
 import { GamesService } from './games.service';
 import { GamesResolver } from './games.resolver';
@@ -8,7 +10,8 @@ import { PlayersModule } from 'src/players/players.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Game]),
+    TypeOrmModule.forFeature([Game, Tournament]),
+    ClubMembersModule,
     GameTypesModule,
     forwardRef(() => PlayersModule),
   ],

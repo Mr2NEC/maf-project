@@ -1,5 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsDate, IsInt, Min } from 'class-validator';
+import { IsDate, IsInt, IsOptional, Min } from 'class-validator';
 
 @InputType()
 export class CreateGameInput {
@@ -11,4 +11,15 @@ export class CreateGameInput {
   @IsInt()
   @Min(1)
   gameTypeId: number;
+
+  /** Club running the game; taken from the tournament when omitted */
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  clubId?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  tournamentId?: number;
 }

@@ -61,6 +61,22 @@ export default async function GamePage({ params }: Props) {
         <span className="text-muted-foreground">
           {format.dateTime(new Date(game.startDate), { dateStyle: "full", timeStyle: "short" })}
         </span>
+        {game.club && (
+          <Link
+            href={{ pathname: "/clubs/[id]", params: { id: game.club.id } }}
+            className="text-muted-foreground hover:underline"
+          >
+            {game.club.title}
+          </Link>
+        )}
+        {game.tournament && (
+          <Link
+            href={{ pathname: "/tournaments/[id]", params: { id: game.tournament.id } }}
+            className="text-muted-foreground hover:underline"
+          >
+            {game.tournament.name}
+          </Link>
+        )}
       </div>
 
       {game.winnerTeam && (

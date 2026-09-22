@@ -15,6 +15,14 @@ export const UpcomingGamesQuery = graphql(`
       players {
         id
       }
+      club {
+        id
+        title
+      }
+      tournament {
+        id
+        name
+      }
     }
   }
 `);
@@ -42,6 +50,14 @@ export const PublicGameQuery = graphql(`
       startDate
       finishedAt
       winnerTeam
+      club {
+        id
+        title
+      }
+      tournament {
+        id
+        name
+      }
       gameType {
         name
         playersCount
@@ -117,8 +133,8 @@ export const PlayerProfileQuery = graphql(`
 `);
 
 export const RatingQuery = graphql(`
-  query Rating($from: DateTime, $take: Int!) {
-    rating(from: $from, take: $take) {
+  query Rating($from: DateTime, $take: Int!, $clubId: Int) {
+    rating(from: $from, take: $take, clubId: $clubId) {
       place
       points
       games

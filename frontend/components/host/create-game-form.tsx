@@ -7,6 +7,8 @@ import { createGame } from "@/lib/host/actions";
 
 type Props = {
   gameTypes: { id: string; name: string; playersCount: number }[];
+  /** Where the game is played: a club, a club's tournament or no club. */
+  places: { value: string; label: string }[];
 };
 
 /** Next full hour in the local zone, formatted for datetime-local. */
@@ -17,7 +19,7 @@ function nextHour(): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:00`;
 }
 
-export function CreateGameForm({ gameTypes }: Props) {
+export function CreateGameForm({ gameTypes, places }: Props) {
   const t = useTranslations("host");
   const [state, action, pending] = useActionState(createGame, null);
   // Computed in the browser: the server does not know the host's time zone
@@ -26,6 +28,16 @@ export function CreateGameForm({ gameTypes }: Props) {
 
   return (
     <form action={action} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="where">{t("where")}</Label>
+        <Select id="where" name="where">
+          {places.map((place) => (
+            <option key={place.value} value={place.value}>
+              {place.label}
+            </option>
+          ))}
+        </Select>
+      </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="gameTypeId">{t("game-type")}</Label>
         <Select id="gameTypeId" name="gameTypeId" required>
