@@ -35,8 +35,8 @@ public website. Development plan: `ROADMAP.md`.
 - Restrict with `@Roles(UserRole.ADMIN)` or `@Roles(UserRole.HOST)`; admins pass every role check.
 - Ownership checks (e.g. `updateUser`) live in the resolver; get the caller with `@CurrentUser()`.
 - New list queries take `@Args() pagination: PaginationArgs`.
-- Schema changes: `npm run migration:generate -- src/migrations/<Name>` in `backend/`.
+- Schema changes: change the entity, then `npm run migration:generate -- src/migrations/<Name>` in
+  `backend/` against a database with all previous migrations applied. Never enable `synchronize`.
 
 ## Known gaps (see ROADMAP.md)
-No initial migration yet (`synchronize` in dev), no refresh tokens.
-Do not deploy to production before the initial migration exists.
+No refresh tokens yet; the game engine (stage 2) does not exist.
