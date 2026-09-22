@@ -52,4 +52,14 @@ export default tseslint.config(
       '@typescript-eslint/only-throw-error': 'off',
     },
   },
+  {
+    // e2e tests read untyped GraphQL responses
+    files: ['test/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+    },
+  },
 );
