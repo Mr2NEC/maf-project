@@ -59,7 +59,9 @@ _Аналіз станом на 2026-09-22. Останній коміт — че
 - [x] Завершити або відкотити міграцію на next-intl v4 і закомітити
 - [x] Прибрати зайве з кореневого `package.json`, додати `.env.example` для кореня, бекенду й фронтенду
 - [x] Перевстановити залежності; `npm run build`, `lint`, `typecheck` мають проходити локально
-- [ ] Оновити залежності (Next, Nest, TypeORM, Storybook) окремим комітом
+- [x] Оновити залежності в межах мажорних версій; Apollo Server 4 → 5 (v4 більше не підтримується),
+      Storybook 8 → 10 (v8 несумісний з Next 15.5)
+- [ ] Окремо: мажорні оновлення — NestJS 12, Next 16, Tailwind 4, TypeScript 7
 - [x] Видалити демо-stories Storybook (`stories/Button`, `Header`, `Page`)
 - [x] Підключити стандарти code-agent: сабмодуль `.standards` + `AGENTS.md`
 - [x] GitHub Actions: lint + typecheck + test + build для обох частин

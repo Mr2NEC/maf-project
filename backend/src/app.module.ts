@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -56,7 +57,11 @@ import { jwtConfig } from './config/jwt.config';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         debug: configService.get<boolean>('graphql.debug'),
-        playground: configService.get<boolean>('graphql.playground'),
+        // GraphQL Playground is not compatible with Apollo Server 5; use Apollo Sandbox instead
+        playground: false,
+        plugins: configService.get<boolean>('graphql.playground')
+          ? [ApolloServerPluginLandingPageLocalDefault()]
+          : [],
         introspection: configService.get<boolean>('graphql.introspection'),
         autoSchemaFile: configService.get<string>('graphql.autoSchemaFile'),
         sortSchema: configService.get<boolean>('graphql.sortSchema'),
