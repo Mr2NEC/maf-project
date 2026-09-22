@@ -1,57 +1,43 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
-import { EntityNotFoundError, FindManyOptions, Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SocialsService } from 'src/socials/socials.service';
-import { ClubsService } from 'src/clubs/clubs.service';
-import { CreateSocialInput } from 'src/socials/dto/create-social.input';
+import { EntityNotFoundError, FindManyOptions, Repository } from 'typeorm';
+import { UserRole } from 'src/enums/user-role.enum';
 import { ProfilesService } from 'src/profiles/profiles.service';
+import { CreateSocialInput } from 'src/socials/dto/create-social.input';
+import { SocialsService } from 'src/socials/socials.service';
+import { UpdateUserInput } from './dto/update-user.input';
+import { User } from './entities/user.entity';
+
+type NewUser = Pick<User, 'username' | 'email'> & { password: string };
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private usersRepository: Repository<User>,
-    private socialsService: SocialsService,
-    private clubsService: ClubsService,
-    private profileService: ProfilesService,
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    private readonly socialsService: SocialsService,
+    private readonly profileService: ProfilesService,
   ) {}
 
-  async create(input: CreateUserInput) {
-    const { email, username, password, clubId, socials } = input;
-
-    const user = await this.createUser({
-      username,
-      email,
-      password,
-    });
-
+  /** Creates a user with an empty profile. `password` must already be hashed. */
+  async create(input: NewUser): Promise<User> {
     const profile = await this.profileService.create({});
-    user.profile = profile;
-
-    if (Array.isArray(socials)) {
-      await this.manageUserSocials(user, socials);
-    }
-
-    await this.manageUserClub(user, clubId);
-
-    return this.usersRepository.save(user);
+    const user = this.usersRepository.create({
+      ...input,
+      role: UserRole.USER,
+      profile,
+    });
+    const saved = await this.usersRepository.save(user);
+    return this.findOne(saved.id);
   }
 
-  async createUser(input: CreateUserInput) {
-    const user = this.usersRepository.create({ ...input });
-    return this.usersRepository.save(user);
-  }
-
-  async findAll(options?: FindManyOptions<User>) {
+  findAll(options?: FindManyOptions<User>) {
     return this.usersRepository.find({
       relations: ['socials', 'club', 'profile'],
       ...options,
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<User> {
     const user = await this.usersRepository.findOne({
       where: { id },
       relations: ['socials', 'club', 'profile'],
@@ -62,82 +48,88 @@ export class UsersService {
     return user;
   }
 
-  async findOneBy(data: Record<string, string | number>) {
-    return this.usersRepository.findOneByOrFail({ ...data });
+  existsByEmail(email: string): Promise<boolean> {
+    return this.usersRepository.existsBy({ email });
   }
 
-  async update(id: number, input: UpdateUserInput) {
-    const { lastName, firstName, username, birthdate, clubId, socials } = input;
+  /** The only place where the password hash is loaded. */
+  findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .getOne();
+  }
 
+  /** Minimal lookup used on every authenticated request. */
+  findAuthInfo(id: number): Promise<Pick<User, 'id' | 'role'> | null> {
+    return this.usersRepository.findOne({
+      where: { id },
+      select: { id: true, role: true },
+    });
+  }
+
+  async update(id: number, input: UpdateUserInput): Promise<User> {
+    const { firstName, lastName, birthdate, username, socials } = input;
     const user = await this.findOne(id);
-    if (!user) {
-      throw new NotFoundException('User not found');
+
+    if (username !== undefined) {
+      user.username = username;
     }
 
-    if (typeof username !== 'undefined') user.username = username;
-
-    if (firstName || lastName || birthdate) {
-      const profile = await this.profileService.update(user.profileId, {
+    if (
+      firstName !== undefined ||
+      lastName !== undefined ||
+      birthdate !== undefined
+    ) {
+      user.profile = await this.profileService.update(user.profileId, {
         firstName,
         lastName,
         birthdate,
       });
-
-      user.profile = profile;
     }
 
-    if (Array.isArray(socials)) {
-      await this.manageUserSocials(user, socials);
+    if (socials?.length) {
+      await this.addMissingSocials(user, socials);
     }
 
-    await this.manageUserClub(user, clubId);
+    await this.usersRepository.save(user);
+    return this.findOne(id);
+  }
 
+  async setRole(id: number, role: UserRole): Promise<User> {
+    const user = await this.findOne(id);
+    user.role = role;
     return this.usersRepository.save(user);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<boolean> {
     const result = await this.usersRepository.delete(id);
     return result.affected === 1;
   }
 
-  async manageUserSocials(
+  private async addMissingSocials(
     user: User,
-    socialsArray: CreateSocialInput[],
+    socials: CreateSocialInput[],
   ): Promise<void> {
-    if (!socialsArray.length) return;
+    const existing = await this.socialsService.findByUserId(user.id);
 
-    const existingSocials = await this.socialsService.findByUserId(user.id);
-
-    const newSocials = Array.isArray(existingSocials)
-      ? socialsArray.filter(social => {
-          return !existingSocials.some(
-            existing =>
-              existing.type === social.type && existing.link === social.link,
-          );
-        })
-      : socialsArray;
+    const newSocials = socials.filter(
+      social =>
+        !existing.some(
+          current =>
+            current.type === social.type && current.link === social.link,
+        ),
+    );
 
     await Promise.all(
       newSocials.map(social =>
         this.socialsService.create({
           ...social,
           userId: user.id,
+          clubId: undefined,
         }),
       ),
     );
-  }
-
-  async manageUserClub(user: User, clubId?: number | null): Promise<void> {
-    if (clubId === null) {
-      user.clubId = null;
-      return;
-    }
-
-    if (typeof clubId !== 'undefined') {
-      const club = await this.clubsService.findOne(clubId);
-      if (!club)
-        throw new NotFoundException(`Club with ID ${clubId} not found`);
-      user.clubId = club.id;
-    }
   }
 }

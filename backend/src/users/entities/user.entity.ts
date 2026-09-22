@@ -29,8 +29,9 @@ export class User {
   @IsString()
   username: string;
 
-  @Field()
-  @Column()
+  // Visible only to the user themselves and admins, see UsersResolver.email
+  @Field(() => String, { nullable: true })
+  @Column({ unique: true })
   email: string;
 
   @Field(() => UserRole)
@@ -41,8 +42,9 @@ export class User {
   })
   role: UserRole;
 
-  @Column({ nullable: true })
-  password: string;
+  // Never selected by default; load explicitly for sign-in only
+  @Column({ nullable: true, select: false })
+  password?: string;
 
   @Field(() => Int, { nullable: true })
   @Column({ name: 'profile_id', nullable: true })
@@ -50,7 +52,7 @@ export class User {
 
   @Field(() => Profile)
   @OneToOne(() => Profile, profile => profile.user, { cascade: true })
-  @JoinColumn()
+  @JoinColumn({ name: 'profile_id' })
   profile: Profile;
 
   @Field(() => [Social], { defaultValue: [] })

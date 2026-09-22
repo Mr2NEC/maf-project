@@ -69,7 +69,7 @@ import { validateEnv } from './config/env.validation';
         sortSchema: configService.get<boolean>('graphql.sortSchema'),
         path: configService.get<string>('graphql.path'),
         cors: configService.get<boolean>('graphql.cors'),
-        context: ({ req }) => ({ req }),
+        context: ({ req, res }) => ({ req, res }),
       }),
       inject: [ConfigService],
     }),

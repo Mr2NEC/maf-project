@@ -1,3 +1,5 @@
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UserRole } from 'src/enums/user-role.enum';
 import { Mutation, Resolver } from '@nestjs/graphql';
 import { DataInitializerService } from './data-initializer.service';
 
@@ -7,6 +9,7 @@ export class DataInitializerResolver {
     private readonly dataInitializerService: DataInitializerService,
   ) {}
 
+  @Roles(UserRole.ADMIN)
   @Mutation(() => String)
   async initializeDatabaseClubs(): Promise<string> {
     await this.dataInitializerService.initializeClubs();

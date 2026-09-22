@@ -25,12 +25,12 @@ export class SocialsService {
     return this.findOneBy({ type, link });
   }
 
-  async findByUserId(id: number) {
-    return this.findOneBy({ userId: id });
+  findByUserId(userId: number): Promise<Social[]> {
+    return this.socialRepository.findBy({ userId });
   }
 
-  async findByClubId(id: number) {
-    return this.findOneBy({ clubId: id });
+  findByClubId(clubId: number): Promise<Social[]> {
+    return this.socialRepository.findBy({ clubId });
   }
 
   async create(socialData: CreateSocialInput): Promise<Social> {
