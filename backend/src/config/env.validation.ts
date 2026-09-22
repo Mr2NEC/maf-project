@@ -84,6 +84,15 @@ export class EnvironmentVariables {
   @Transform(toBoolean)
   @IsBoolean()
   GRAPHQL_CORS: boolean = false;
+
+  /**
+   * Express "trust proxy" setting, e.g. "uniquelocal" when the Next.js server
+   * (which forwards the visitor IP) runs in the same private network.
+   * Leave empty when the API is reachable directly from the internet.
+   */
+  @IsOptional()
+  @IsString()
+  TRUST_PROXY?: string;
 }
 
 /**
