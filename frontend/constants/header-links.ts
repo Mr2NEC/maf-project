@@ -1,7 +1,8 @@
 import { Messages } from "next-intl";
 import { routing } from "@/i18n/routing";
 
-type AppPathname = keyof typeof routing.pathnames;
+/** Static routes only: header links have no params */
+type AppPathname = Exclude<keyof typeof routing.pathnames, `${string}[${string}`>;
 
 export const APP_HEADER_LINKS: ReadonlyArray<{
   href: AppPathname;

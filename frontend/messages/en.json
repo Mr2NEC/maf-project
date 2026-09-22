@@ -53,5 +53,26 @@
   },
   "locale-layout": {
     "title": "Maf App"
+  },
+  "auth": {
+    "login-title": "Sign in",
+    "register-title": "Create an account",
+    "username": "Nickname",
+    "email": "Email",
+    "password": "Password",
+    "password-hint": "At least 8 characters, no spaces",
+    "sign-in": "Sign in",
+    "sign-up": "Sign up",
+    "sign-out": "Sign out",
+    "host-panel": "Host panel",
+    "no-account": "No account yet?",
+    "have-account": "Already have an account?",
+    "errors": {
+      "invalid_credentials": "Wrong email or password",
+      "email_taken": "This email is already registered",
+      "invalid_input": "Please check the form",
+      "too_many_requests": "Too many attempts. Try again in a minute",
+      "unknown": "Something went wrong. Try again later"
+    }
   }
 }

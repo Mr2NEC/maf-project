@@ -53,5 +53,26 @@
   },
   "locale-layout": {
     "title": "Maf App"
+  },
+  "auth": {
+    "login-title": "Вхід",
+    "register-title": "Реєстрація",
+    "username": "Нікнейм",
+    "email": "Email",
+    "password": "Пароль",
+    "password-hint": "Щонайменше 8 символів, без пробілів",
+    "sign-in": "Увійти",
+    "sign-up": "Зареєструватися",
+    "sign-out": "Вийти",
+    "host-panel": "Панель ведучого",
+    "no-account": "Ще немає акаунта?",
+    "have-account": "Вже маєте акаунт?",
+    "errors": {
+      "invalid_credentials": "Неправильний email або пароль",
+      "email_taken": "Цей email уже зареєстровано",
+      "invalid_input": "Перевірте дані у формі",
+      "too_many_requests": "Забагато спроб. Спробуйте за хвилину",
+      "unknown": "Щось пішло не так. Спробуйте пізніше"
+    }
   }
 }
