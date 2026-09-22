@@ -17,7 +17,7 @@ export class ActionTypesService {
   ) {}
 
   async create(createActionTypeInput: CreateActionTypeInput) {
-    const { name } = createActionTypeInput;
+    const { name, effect, phase } = createActionTypeInput;
     const existingActionType = await this.actionTypesRepository.findOne({
       where: { name },
     });
@@ -28,7 +28,11 @@ export class ActionTypesService {
       );
     }
 
-    const actionType = this.actionTypesRepository.create({ name });
+    const actionType = this.actionTypesRepository.create({
+      name,
+      effect,
+      phase: phase ?? null,
+    });
     return this.actionTypesRepository.save(actionType);
   }
 
@@ -47,7 +51,7 @@ export class ActionTypesService {
   }
 
   async update(id: number, updateActionTypeInput: UpdateActionTypeInput) {
-    const { name } = updateActionTypeInput;
+    const { name, effect, phase } = updateActionTypeInput;
 
     const actionType = await this.findOne(id);
     if (!actionType) {
@@ -68,6 +72,14 @@ export class ActionTypesService {
       actionType.name = name;
     }
 
+    if (effect !== undefined) {
+      actionType.effect = effect;
+    }
+
+    if (phase !== undefined) {
+      actionType.phase = phase;
+    }
+
     return this.actionTypesRepository.save(actionType);
   }
 
@@ -76,6 +88,7 @@ export class ActionTypesService {
     if (!actionType) {
       throw new NotFoundException(`Action type with id ${id} not found`);
     }
-    return this.actionTypesRepository.delete(actionType);
+    await this.actionTypesRepository.delete(id);
+    return actionType;
   }
 }

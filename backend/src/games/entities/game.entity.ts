@@ -1,3 +1,5 @@
+import { GamePhase } from 'src/enums/game-phase.enum';
+import { Team } from 'src/enums/team.enum';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Action } from 'src/actions/entities/action.entity';
 import { GameStatus } from 'src/enums/game-status.enum';
@@ -36,6 +38,19 @@ export class Game {
   @Field(() => Int)
   @Column({ default: 0 })
   currentRound: number;
+
+  /** Current phase while the game is in progress */
+  @Field(() => GamePhase, { nullable: true })
+  @Column({ type: 'enum', enum: GamePhase, nullable: true })
+  phase: GamePhase | null;
+
+  @Field(() => Team, { nullable: true })
+  @Column({ type: 'enum', enum: Team, nullable: true })
+  winnerTeam: Team | null;
+
+  @Field(() => Date, { nullable: true })
+  @Column({ type: 'datetime', nullable: true })
+  finishedAt: Date | null;
 
   @Field(() => Int)
   @Column({ name: 'game_type_id' })

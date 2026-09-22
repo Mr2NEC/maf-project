@@ -6,6 +6,7 @@ import { DateUtils } from 'src/common/utils/date.utils';
 import { GameTypesService } from 'src/game-types/game-types.service';
 import { CreateGameInput } from './dto/create-game.input';
 import { UpdateGameInput } from './dto/update-game.input';
+import { GameStatus } from 'src/enums/game-status.enum';
 import { Game } from './entities/game.entity';
 
 @Injectable()
@@ -17,7 +18,7 @@ export class GamesService {
 
   findAll({ skip, take }: PaginationArgs): Promise<Game[]> {
     return this.gamesRepository.find({
-      relations: ['gameType', 'players'],
+      relations: ['gameType', 'players', 'players.user', 'players.role'],
       order: { startDate: 'DESC', id: 'DESC' },
       skip,
       take,
@@ -27,7 +28,8 @@ export class GamesService {
   async findOne(id: number): Promise<Game> {
     const game = await this.gamesRepository.findOne({
       where: { id },
-      relations: ['gameType', 'players'],
+      relations: ['gameType', 'players', 'players.user', 'players.role'],
+      order: { players: { seatNumber: 'ASC' } },
     });
     if (!game) {
       throw new EntityNotFoundError(Game, { id });
@@ -45,40 +47,46 @@ export class GamesService {
   }
 
   async update(id: number, input: UpdateGameInput): Promise<Game> {
-    const { gameTypeId, startDate, status, currentRound } = input;
+    const { gameTypeId, startDate } = input;
     const game = await this.findOne(id);
 
-    if (gameTypeId !== undefined && gameTypeId !== game.gameType.id) {
-      game.gameType = await this.gameTypesService.findOne(gameTypeId);
+    if (game.status !== GameStatus.WAITING) {
+      throw new BadRequestException(
+        'Only a game that has not started can be edited',
+      );
     }
 
+    const changes: Partial<Game> = {};
+    if (gameTypeId !== undefined && gameTypeId !== game.gameTypeId) {
+      changes.gameTypeId = (await this.gameTypesService.findOne(gameTypeId)).id;
+    }
     if (startDate !== undefined) {
       assertNotInPast(startDate);
-      game.startDate = startDate;
+      changes.startDate = startDate;
     }
 
-    if (status !== undefined) {
-      game.status = status;
+    // update() instead of save(): saving a game with its loaded players would
+    // also write that (possibly stale) relation
+    if (Object.keys(changes).length > 0) {
+      await this.gamesRepository.update(id, changes);
     }
-
-    if (currentRound !== undefined) {
-      if (currentRound < game.currentRound) {
-        throw new BadRequestException(
-          `Round cannot go back from ${game.currentRound} to ${currentRound}`,
-        );
-      }
-      game.currentRound = currentRound;
-    }
-
-    return this.gamesRepository.save(game);
+    return this.findOne(id);
   }
 
+  /** Games with results are kept for history; cancel them instead. */
   async delete(id: number): Promise<Game> {
     const game = await this.findOne(id);
+    if (!DELETABLE_STATUSES.includes(game.status)) {
+      throw new BadRequestException(
+        'A started or finished game cannot be deleted; cancel it instead',
+      );
+    }
     await this.gamesRepository.delete(id);
     return game;
   }
 }
+
+const DELETABLE_STATUSES = [GameStatus.WAITING, GameStatus.CANCELLED];
 
 function assertNotInPast(date: Date): void {
   if (!DateUtils.isTodayOrFuture(date)) {

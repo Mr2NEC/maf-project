@@ -22,6 +22,11 @@ export class GameType {
   @Column()
   playersCount: number;
 
+  /** A player with this many fouls is disqualified */
+  @Field(() => Int)
+  @Column({ default: 4 })
+  maxFouls: number;
+
   @Field(() => [Game])
   @OneToMany(() => Game, game => game.gameType)
   games: Game[];

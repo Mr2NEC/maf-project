@@ -21,7 +21,7 @@ export class RolesService {
   ) {}
 
   async create(data: CreateRoleInput) {
-    const { name, actionIds } = data;
+    const { name, team, actionIds } = data;
     const existingRole = await this.rolesRepository.findOne({
       where: { name },
     });
@@ -30,7 +30,7 @@ export class RolesService {
       throw new BadRequestException(`Role with name "${name}" already exists`);
     }
 
-    const role = this.rolesRepository.create({ name });
+    const role = this.rolesRepository.create({ name, team });
     const savedRole = await this.rolesRepository.save(role);
 
     if (actionIds && actionIds.length > 0) {
@@ -64,7 +64,7 @@ export class RolesService {
   }
 
   async update(id: number, data: UpdateRoleInput) {
-    const { name, actionIds } = data;
+    const { name, team, actionIds } = data;
 
     const role = await this.findOne(id);
 
@@ -82,6 +82,10 @@ export class RolesService {
         );
       }
       role.name = name;
+    }
+
+    if (team !== undefined) {
+      role.team = team;
     }
 
     if (actionIds && actionIds.length > 0) {

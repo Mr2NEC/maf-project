@@ -1,18 +1,9 @@
-import { Field, InputType, Int, PartialType } from '@nestjs/graphql';
-import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
-import { GameStatus } from 'src/enums/game-status.enum';
+import { InputType, PartialType } from '@nestjs/graphql';
 import { CreateGameInput } from './create-game.input';
 
+/**
+ * Only scheduling details can be edited, and only before the game starts.
+ * Status, phase and round are driven by the game engine.
+ */
 @InputType()
-export class UpdateGameInput extends PartialType(CreateGameInput) {
-  @Field(() => GameStatus, { nullable: true })
-  @IsOptional()
-  @IsEnum(GameStatus)
-  status?: GameStatus;
-
-  @Field(() => Int, { nullable: true })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  currentRound?: number;
-}
+export class UpdateGameInput extends PartialType(CreateGameInput) {}
