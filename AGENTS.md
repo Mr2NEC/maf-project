@@ -30,6 +30,18 @@ public website. Development plan: `ROADMAP.md`.
   `@/i18n/navigation`, not from `next/link`.
 - Stories live next to components: `components/**/<name>.stories.tsx`.
 
+## Frontend data flow
+- Only the Next.js server talks to the API: `request()` in `frontend/lib/graphql/client.ts`
+  (server-only). The JWT sits in the httpOnly cookie `maf_session`; never expose it to the browser.
+- Queries: write `graphql(\`...\`)` documents (see `lib/host/queries.ts`, `lib/public/queries.ts`),
+  then run `npm run codegen` in `frontend/`. Commit `frontend/gql/` — CI fails if it is stale.
+- Mutations from the UI are server actions (`lib/auth/actions.ts`, `lib/host/actions.ts`) that
+  call `requireHost()` where needed and `revalidatePath()` the affected page.
+- Client components must not import from `@/components/shared` (the barrel pulls in server-only
+  code); import the specific file.
+- Anything computed from the current time or theme must not differ between server and browser
+  (hydration): compute it in `useEffect` or render both variants and pick with CSS.
+
 ## Auth model
 - Every resolver requires a JWT unless marked `@Public()` (global guards in `auth/auth.module.ts`).
 - Restrict with `@Roles(UserRole.ADMIN)` or `@Roles(UserRole.HOST)`; admins pass every role check.
