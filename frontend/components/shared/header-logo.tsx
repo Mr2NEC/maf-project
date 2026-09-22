@@ -1,19 +1,10 @@
-"use client";
-
-import { useTheme } from "next-themes";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 
-export const HeaderLogo = () => {
-  const { theme } = useTheme();
-  return (
-    <Link href="/">
-      <Image
-        src={theme === "light" ? "/logo.png" : "/logo-w.png"}
-        alt="Maf Logo"
-        width={60}
-        height={40}
-      />
-    </Link>
-  );
-};
+/** Both logos are rendered and CSS picks one, so SSR and the browser agree. */
+export const HeaderLogo = () => (
+  <Link href="/">
+    <Image src="/logo.png" alt="Maf Logo" width={60} height={40} className="dark:hidden" />
+    <Image src="/logo-w.png" alt="Maf Logo" width={60} height={40} className="hidden dark:block" />
+  </Link>
+);

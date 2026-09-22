@@ -35,7 +35,14 @@ export class GamesService {
   async findOne(id: number): Promise<Game> {
     const game = await this.gamesRepository.findOne({
       where: { id },
-      relations: ['gameType', 'players', 'players.user', 'players.role'],
+      relations: [
+        'gameType',
+        'gameType.gameTypeRoles',
+        'gameType.gameTypeRoles.role',
+        'players',
+        'players.user',
+        'players.role',
+      ],
       order: { players: { seatNumber: 'ASC' } },
     });
     if (!game) {

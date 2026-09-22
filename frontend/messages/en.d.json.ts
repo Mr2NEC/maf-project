@@ -77,6 +77,91 @@ declare const messages: {
       "too_many_requests": "Too many attempts. Try again in a minute",
       "unknown": "Something went wrong. Try again later"
     }
+  },
+  "game": {
+    "status": {
+      "WAITING": "Registration",
+      "IN_PROGRESS": "In progress",
+      "FINISHED": "Finished",
+      "CANCELLED": "Cancelled"
+    },
+    "phase": {
+      "NIGHT": "Night {round, number}",
+      "DAY": "Day {round, number}"
+    },
+    "team": {
+      "TOWN": "town",
+      "MAFIA": "mafia",
+      "NEUTRAL": "neutral"
+    },
+    "winner": {
+      "TOWN": "The town wins",
+      "MAFIA": "The mafia wins",
+      "NEUTRAL": "The maniac wins"
+    },
+    "player-status": {
+      "ALIVE": "In the game",
+      "KILLED": "Killed at night",
+      "VOTED_OUT": "Voted out",
+      "DISQUALIFIED": "Disqualified"
+    }
+  },
+  "host": {
+    "title": "Host panel",
+    "active-games": "Upcoming and running games",
+    "no-active-games": "No games yet. Create one on the right.",
+    "recent-games": "Recently finished",
+    "new-game": "New game",
+    "game-type": "Game type",
+    "start-date": "Start",
+    "create-game": "Create game",
+    "seated": "{count, number}/{total, number} seated",
+    "table": "Table",
+    "player": "Player",
+    "role": "Role",
+    "fouls": "Fouls",
+    "add-foul": "+ foul",
+    "remove": "Remove",
+    "round": "round {round, number}",
+    "seating": "Seating",
+    "search-player": "Player nickname",
+    "search": "Find",
+    "roles": "Roles",
+    "deal-random": "Deal roles randomly",
+    "deal-manual": "Enter roles from the cards",
+    "save-roles": "Save roles",
+    "start-game": "Start the game",
+    "start-hint": "Deal roles to start the game",
+    "cancel-game": "Cancel game",
+    "cancel-confirm": "Cancel this game? This cannot be undone.",
+    "cancelled": "The game was cancelled.",
+    "who-acts": "Who acts",
+    "action": "Action",
+    "target": "On whom",
+    "record-action": "Record action",
+    "this-night": "This night",
+    "quiet-night": "No actions yet",
+    "end-night": "End the night",
+    "no-vote": "did not vote",
+    "tally": "Votes",
+    "tie": "Tie between {players}",
+    "eliminate-all": "Everyone leaves",
+    "keep-all": "Everyone stays",
+    "revote": "Revote",
+    "end-day": "End the day",
+    "end-day-no-vote": "End the day without a vote",
+    "events": "What happened",
+    "killed": "Killed: {players}",
+    "nobody-killed": "Nobody was killed",
+    "saved": "Saved by the doctor: {players}",
+    "blocked": "Blocked: {players}",
+    "check": "{actor} checked {target}: {result}",
+    "check-blocked": "blocked, no result",
+    "voted-out": "Voted out: {players}",
+    "nobody-voted-out": "Nobody was voted out",
+    "bonus-player": "Bonus to",
+    "bonus-points": "Points",
+    "add-bonus": "Add bonus"
   }
 };
 export default messages;
