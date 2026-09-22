@@ -46,6 +46,18 @@ const CreateGameMutation = graphql(`
   }
 `);
 
+/** "club:3", "tournament:9" or "" (a game without a club). */
+function whereToPlay(value: string): { clubId?: number; tournamentId?: number } {
+  const [kind, id] = value.split(":");
+  if (kind === "club") {
+    return { clubId: Number(id) };
+  }
+  if (kind === "tournament") {
+    return { tournamentId: Number(id) };
+  }
+  return {};
+}
+
 export async function createGame(
   _state: HostActionResult | null,
   form: FormData
@@ -53,6 +65,7 @@ export async function createGame(
   const result = await run(null, () =>
     request(CreateGameMutation, {
       data: {
+        ...whereToPlay(String(form.get("where") ?? "")),
         gameTypeId: Number(form.get("gameTypeId")),
         // datetime-local has no zone: it is the host's local time
         startDate: new Date(String(form.get("startDate"))).toISOString(),

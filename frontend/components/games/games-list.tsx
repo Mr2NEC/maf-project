@@ -3,15 +3,17 @@ import { GameStatusBadge } from "@/components/host/status-badge";
 import type { UpcomingGamesQuery } from "@/gql/graphql";
 import { Link } from "@/i18n/navigation";
 
-type Game = UpcomingGamesQuery["games"][number];
+type UpcomingGame = UpcomingGamesQuery["games"][number];
+/** Club and tournament are optional: a club's or tournament's page does not repeat them. */
+type Game = Omit<UpcomingGame, "club" | "tournament"> & Partial<Pick<UpcomingGame, "club" | "tournament">>;
 
 /** Upcoming and running games as a list of cards. */
-export async function GamesList({ games }: { games: Game[] }) {
+export async function GamesList({ games, empty }: { games: Game[]; empty?: string }) {
   const t = await getTranslations("games");
   const format = await getFormatter();
 
   if (games.length === 0) {
-    return <p className="text-muted-foreground">{t("no-upcoming")}</p>;
+    return <p className="text-muted-foreground">{empty ?? t("no-upcoming")}</p>;
   }
 
   return (
@@ -34,7 +36,9 @@ export async function GamesList({ games }: { games: Game[] }) {
                     minute: "2-digit",
                   })}
                 </span>
-                <span className="text-sm text-muted-foreground">{game.gameType.name}</span>
+                <span className="text-sm text-muted-foreground">
+                  {[game.gameType.name, game.club?.title, game.tournament?.name].filter(Boolean).join(" · ")}
+                </span>
               </span>
               <span className="flex items-center gap-3 text-sm">
                 {game.status === "WAITING" && (

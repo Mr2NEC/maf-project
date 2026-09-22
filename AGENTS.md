@@ -46,6 +46,11 @@ public website. Development plan: `ROADMAP.md`.
 - Every resolver requires a JWT unless marked `@Public()` (global guards in `auth/auth.module.ts`).
 - Restrict with `@Roles(UserRole.ADMIN)` or `@Roles(UserRole.HOST)`; admins pass every role check.
 - Ownership checks (e.g. `updateUser`) live in the resolver; get the caller with `@CurrentUser()`.
+- Club permissions come from `club_members` (MEMBER < HOST < ADMIN, active members only), checked
+  with `ClubAccessService`: club games need a club HOST, games without a club need a platform HOST;
+  platform ADMIN passes every club check. Do not use `@Roles` for club actions.
+- The frontend mirrors this in `lib/auth/session.ts` (`hasClubRole`, `isHost`) only to show or hide
+  controls; the API is the authority.
 - New list queries take `@Args() pagination: PaginationArgs`.
 - Schema changes: change the entity, then `npm run migration:generate -- src/migrations/<Name>` in
   `backend/` against a database with all previous migrations applied. Never enable `synchronize`.
@@ -57,6 +62,8 @@ public website. Development plan: `ROADMAP.md`.
 - Roles and action types are data: the engine only knows `Team` and `ActionEffect`.
   Required reference data (e.g. the VOTE action type) is created by migrations.
 - Never expose a player's role while the game runs (see `PlayersResolver.canSeeRole`).
+- `Player.points` is derived: the club's rating rules applied to the result, plus `Player.bonus`
+  when the club counts bonuses. Recompute it with `RatingPointsService.recalculate`, never by hand.
 - e2e tests (`npm run test:e2e`) need MySQL and drop the database named in `MYSQL_DATABASE`
   (must contain "e2e"); locally: `MYSQL_PASSWORD=<from .env.dev> npm run test:e2e` after granting the
   dev user access once: `GRANT ALL ON maf_e2e.* TO 'maf'@'%'` (as MySQL root).

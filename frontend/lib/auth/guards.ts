@@ -12,3 +12,12 @@ export async function requireHost(): Promise<SessionUser> {
   }
   return user as SessionUser;
 }
+
+/** For pages and commands that need any signed-in user. */
+export async function requireUser(): Promise<SessionUser> {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect({ href: "/login", locale: await getLocale() });
+  }
+  return user as SessionUser;
+}

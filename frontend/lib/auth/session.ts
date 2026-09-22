@@ -3,7 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import { graphql } from "@/gql";
-import type { UserRole } from "@/gql/graphql";
+import type { ClubRole, MembershipStatus, UserRole } from "@/gql/graphql";
 import {
   GraphQLRequestError,
   SESSION_COOKIE,
@@ -18,6 +18,15 @@ const MeQuery = graphql(`
       email
       role
     }
+    myClubs {
+      id
+      clubId
+      role
+      status
+      club {
+        title
+      }
+    }
   }
 `);
 
@@ -26,6 +35,15 @@ export type SessionUser = {
   username: string;
   email?: string | null;
   role: UserRole;
+  clubs: SessionMembership[];
+};
+
+export type SessionMembership = {
+  memberId: string;
+  clubId: number;
+  title: string;
+  role: ClubRole;
+  status: MembershipStatus;
 };
 
 /** Reads the token's expiry so the cookie lives exactly as long as the token. */
@@ -62,7 +80,17 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
     return null;
   }
   try {
-    return (await request(MeQuery)).me;
+    const { me, myClubs } = await request(MeQuery);
+    return {
+      ...me,
+      clubs: myClubs.map((m) => ({
+        memberId: m.id,
+        clubId: m.clubId,
+        title: m.club.title,
+        role: m.role,
+        status: m.status,
+      })),
+    };
   } catch (error) {
     // Expired or revoked token: behave as signed out
     if (error instanceof GraphQLRequestError && error.code === "UNAUTHENTICATED") {
@@ -72,6 +100,32 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   }
 });
 
-export function isHost(user: SessionUser | null): boolean {
+const CLUB_ROLE_RANK: Record<ClubRole, number> = { MEMBER: 1, HOST: 2, ADMIN: 3 };
+
+/** The user's active role in a club; platform admins act as club admins. */
+export function clubRole(user: SessionUser | null, clubId: number): ClubRole | null {
+  if (user?.role === "ADMIN") {
+    return "ADMIN";
+  }
+  const membership = user?.clubs.find((m) => m.clubId === clubId && m.status === "ACTIVE");
+  return membership?.role ?? null;
+}
+
+export function hasClubRole(user: SessionUser | null, clubId: number, role: ClubRole): boolean {
+  const current = clubRole(user, clubId);
+  return current !== null && CLUB_ROLE_RANK[current] >= CLUB_ROLE_RANK[role];
+}
+
+/** Clubs whose games the user may run. */
+export function hostedClubs(user: SessionUser | null): SessionMembership[] {
+  return (user?.clubs ?? []).filter((m) => m.status === "ACTIVE" && m.role !== "MEMBER");
+}
+
+/** Platform hosts run games without a club; club hosts run their club's games. */
+export function isPlatformHost(user: SessionUser | null): boolean {
   return user?.role === "HOST" || user?.role === "ADMIN";
+}
+
+export function isHost(user: SessionUser | null): boolean {
+  return isPlatformHost(user) || hostedClubs(user).length > 0;
 }

@@ -27,8 +27,29 @@ export type AwardBonusInput = {
   points: number;
 };
 
+export type ClubRole =
+  | 'ADMIN'
+  | 'HOST'
+  | 'MEMBER';
+
+export type CreateClubInput = {
+  description?: string | null | undefined;
+  region: string;
+  title: string;
+};
+
 export type CreateGameInput = {
+  clubId?: number | null | undefined;
   gameTypeId: number;
+  startDate: string;
+  tournamentId?: number | null | undefined;
+};
+
+export type CreateTournamentInput = {
+  clubId: number;
+  description?: string | null | undefined;
+  endDate?: string | null | undefined;
+  name: string;
   startDate: string;
 };
 
@@ -48,6 +69,10 @@ export type GameStatus =
   | 'IN_PROGRESS'
   | 'WAITING';
 
+export type MembershipStatus =
+  | 'ACTIVE'
+  | 'PENDING';
+
 export type NightActionInput = {
   actionTypeId: number;
   actorId: number;
@@ -59,6 +84,15 @@ export type PlayerStatus =
   | 'DISQUALIFIED'
   | 'KILLED'
   | 'VOTED_OUT';
+
+export type RatingRulesInput = {
+  bonusEnabled: boolean;
+  lossPoints: number;
+  mafiaWinPoints: number;
+  minGames: number;
+  neutralWinPoints: number;
+  townWinPoints: number;
+};
 
 export type RoleAssignmentInput = {
   playerId: number;
@@ -86,6 +120,25 @@ export type TieBreak =
   | 'ELIMINATE_ALL'
   | 'KEEP_ALL';
 
+export type TournamentStatus =
+  | 'ACTIVE'
+  | 'FINISHED'
+  | 'PLANNED';
+
+export type UpdateClubInput = {
+  description?: string | null | undefined;
+  region?: string | null | undefined;
+  title?: string | null | undefined;
+};
+
+export type UpdateTournamentInput = {
+  description?: string | null | undefined;
+  endDate?: string | null | undefined;
+  name?: string | null | undefined;
+  startDate?: string | null | undefined;
+  status?: TournamentStatus | null | undefined;
+};
+
 /** The role of a user */
 export type UserRole =
   | 'ADMIN'
@@ -96,6 +149,13 @@ export type VoteInput = {
   targetId: number;
   voterIds: Array<number>;
 };
+
+export type ClubRulesQueryVariables = Exact<{
+  id: number;
+}>;
+
+
+export type ClubRulesQuery = { club: { title: string, ratingRules: { townWinPoints: number, mafiaWinPoints: number, neutralWinPoints: number, lossPoints: number, bonusEnabled: boolean, minGames: number } } };
 
 export type SignInMutationVariables = Exact<{
   input: SignInInput;
@@ -114,7 +174,148 @@ export type SignUpMutation = { signup: { id: string } };
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { me: { id: string, username: string, email: string | null, role: UserRole } };
+export type MeQuery = { me: { id: string, username: string, email: string | null, role: UserRole }, myClubs: Array<{ id: string, clubId: number, role: ClubRole, status: MembershipStatus, club: { title: string } }> };
+
+export type CreateClubMutationVariables = Exact<{
+  input: CreateClubInput;
+}>;
+
+
+export type CreateClubMutation = { createClub: { id: string } };
+
+export type UpdateClubMutationVariables = Exact<{
+  id: number;
+  input: UpdateClubInput;
+}>;
+
+
+export type UpdateClubMutation = { updateClub: { id: string } };
+
+export type UpdateRatingRulesMutationVariables = Exact<{
+  clubId: number;
+  rules: RatingRulesInput;
+}>;
+
+
+export type UpdateRatingRulesMutation = { updateRatingRules: { id: string } };
+
+export type JoinClubMutationVariables = Exact<{
+  clubId: number;
+}>;
+
+
+export type JoinClubMutation = { joinClub: { id: string } };
+
+export type LeaveClubMutationVariables = Exact<{
+  clubId: number;
+}>;
+
+
+export type LeaveClubMutation = { leaveClub: boolean };
+
+export type ApproveClubMemberMutationVariables = Exact<{
+  memberId: number;
+}>;
+
+
+export type ApproveClubMemberMutation = { approveClubMember: { id: string } };
+
+export type SetClubMemberRoleMutationVariables = Exact<{
+  memberId: number;
+  role: ClubRole;
+}>;
+
+
+export type SetClubMemberRoleMutation = { setClubMemberRole: { id: string } };
+
+export type RemoveClubMemberMutationVariables = Exact<{
+  memberId: number;
+}>;
+
+
+export type RemoveClubMemberMutation = { removeClubMember: boolean };
+
+export type CreateTournamentMutationVariables = Exact<{
+  input: CreateTournamentInput;
+}>;
+
+
+export type CreateTournamentMutation = { createTournament: { id: string } };
+
+export type UpdateTournamentMutationVariables = Exact<{
+  id: number;
+  input: UpdateTournamentInput;
+}>;
+
+
+export type UpdateTournamentMutation = { updateTournament: { id: string } };
+
+export type DeleteTournamentMutationVariables = Exact<{
+  id: number;
+}>;
+
+
+export type DeleteTournamentMutation = { deleteTournament: boolean };
+
+export type AddTournamentParticipantMutationVariables = Exact<{
+  tournamentId: number;
+  userId: number;
+}>;
+
+
+export type AddTournamentParticipantMutation = { addTournamentParticipant: Array<{ id: string }> };
+
+export type RemoveTournamentParticipantMutationVariables = Exact<{
+  tournamentId: number;
+  userId: number;
+}>;
+
+
+export type RemoveTournamentParticipantMutation = { removeTournamentParticipant: Array<{ id: string }> };
+
+export type ClubsQueryVariables = Exact<{
+  search?: string | null | undefined;
+}>;
+
+
+export type ClubsQuery = { clubs: Array<{ id: string, title: string, region: string, description: string | null }> };
+
+export type ClubQueryVariables = Exact<{
+  id: number;
+  clubId: number;
+  from: string;
+}>;
+
+
+export type ClubQuery = { club: { id: string, title: string, region: string, description: string | null, createdAt: string, ratingRules: { townWinPoints: number, mafiaWinPoints: number, neutralWinPoints: number, lossPoints: number, bonusEnabled: boolean, minGames: number } }, clubMembers: Array<{ id: string, role: ClubRole, user: { id: string, username: string } }>, games: Array<{ id: string, status: GameStatus, phase: GamePhase | null, currentRound: number, startDate: string, gameType: { name: string, playersCount: number }, players: Array<{ id: string }>, club: { id: string, title: string } | null, tournament: { id: string, name: string } | null }>, rating: Array<{ place: number, points: number, games: number, wins: number, winRate: number, user: { id: string, username: string } }>, tournaments: Array<{ id: string, name: string, status: TournamentStatus, startDate: string, endDate: string | null }> };
+
+export type ClubManageQueryVariables = Exact<{
+  id: number;
+  clubId: number;
+}>;
+
+
+export type ClubManageQuery = { club: { id: string, title: string, region: string, description: string | null, ratingRules: { townWinPoints: number, mafiaWinPoints: number, neutralWinPoints: number, lossPoints: number, bonusEnabled: boolean, minGames: number } }, members: Array<{ id: string, role: ClubRole, createdAt: string, user: { id: string, username: string } }>, pending: Array<{ id: string, createdAt: string, user: { id: string, username: string } }> };
+
+export type TournamentsQueryVariables = Exact<{
+  clubId?: number | null | undefined;
+  statuses?: Array<TournamentStatus> | TournamentStatus | null | undefined;
+}>;
+
+
+export type TournamentsQuery = { tournaments: Array<{ id: string, name: string, status: TournamentStatus, startDate: string, endDate: string | null, club: { id: string, title: string } }> };
+
+export type TournamentQueryVariables = Exact<{
+  id: number;
+}>;
+
+
+export type TournamentQuery = { tournament: { id: string, clubId: number, name: string, description: string | null, status: TournamentStatus, startDate: string, endDate: string | null, club: { id: string, title: string }, standings: Array<{ place: number, points: number, games: number, wins: number, user: { id: string, username: string } }>, participants: Array<{ id: string, user: { id: string, username: string } }>, games: Array<{ id: string, status: GameStatus, phase: GamePhase | null, currentRound: number, startDate: string, winnerTeam: Team | null, gameType: { name: string, playersCount: number }, players: Array<{ id: string }> }> } };
+
+export type OpenTournamentsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type OpenTournamentsQuery = { tournaments: Array<{ id: string, clubId: number, name: string }> };
 
 export type CreateGameMutationVariables = Exact<{
   data: CreateGameInput;
@@ -211,7 +412,7 @@ export type AwardBonusMutation = { awardBonus: { id: string } };
 export type HostGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HostGamesQuery = { active: Array<{ id: string, status: GameStatus, phase: GamePhase | null, currentRound: number, startDate: string, gameType: { name: string, playersCount: number }, players: Array<{ id: string }> }>, finished: Array<{ id: string, startDate: string, winnerTeam: Team | null, gameType: { name: string } }>, gameTypes: Array<{ id: string, name: string, playersCount: number }> };
+export type HostGamesQuery = { active: Array<{ id: string, clubId: number | null, status: GameStatus, phase: GamePhase | null, currentRound: number, startDate: string, club: { title: string } | null, tournament: { name: string } | null, gameType: { name: string, playersCount: number }, players: Array<{ id: string }> }>, finished: Array<{ id: string, clubId: number | null, startDate: string, winnerTeam: Team | null, gameType: { name: string } }>, gameTypes: Array<{ id: string, name: string, playersCount: number }>, tournaments: Array<{ id: string, clubId: number, name: string }> };
 
 export type HostGameQueryVariables = Exact<{
   id: number;
@@ -240,7 +441,7 @@ export type UpcomingGamesQueryVariables = Exact<{
 }>;
 
 
-export type UpcomingGamesQuery = { games: Array<{ id: string, status: GameStatus, phase: GamePhase | null, currentRound: number, startDate: string, gameType: { name: string, playersCount: number }, players: Array<{ id: string }> }> };
+export type UpcomingGamesQuery = { games: Array<{ id: string, status: GameStatus, phase: GamePhase | null, currentRound: number, startDate: string, gameType: { name: string, playersCount: number }, players: Array<{ id: string }>, club: { id: string, title: string } | null, tournament: { id: string, name: string } | null }> };
 
 export type RecentGamesQueryVariables = Exact<{
   take: number;
@@ -254,7 +455,7 @@ export type PublicGameQueryVariables = Exact<{
 }>;
 
 
-export type PublicGameQuery = { game: { id: string, status: GameStatus, phase: GamePhase | null, currentRound: number, startDate: string, finishedAt: string | null, winnerTeam: Team | null, gameType: { name: string, playersCount: number }, players: Array<{ id: string, userId: number, seatNumber: number | null, username: string, status: PlayerStatus, fouls: number, points: number, eliminatedRound: number | null, role: { name: string, team: Team } | null }> } };
+export type PublicGameQuery = { game: { id: string, status: GameStatus, phase: GamePhase | null, currentRound: number, startDate: string, finishedAt: string | null, winnerTeam: Team | null, club: { id: string, title: string } | null, tournament: { id: string, name: string } | null, gameType: { name: string, playersCount: number }, players: Array<{ id: string, userId: number, seatNumber: number | null, username: string, status: PlayerStatus, fouls: number, points: number, eliminatedRound: number | null, role: { name: string, team: Team } | null }> } };
 
 export type PlayersQueryVariables = Exact<{
   search?: string | null | undefined;
@@ -275,6 +476,7 @@ export type PlayerProfileQuery = { user: { id: string, username: string, created
 export type RatingQueryVariables = Exact<{
   from?: string | null | undefined;
   take: number;
+  clubId?: number | null | undefined;
 }>;
 
 
@@ -299,6 +501,21 @@ export class TypedDocumentString<TResult, TVariables>
   }
 }
 
+export const ClubRulesDocument = new TypedDocumentString(`
+    query ClubRules($id: Int!) {
+  club(id: $id) {
+    title
+    ratingRules {
+      townWinPoints
+      mafiaWinPoints
+      neutralWinPoints
+      lossPoints
+      bonusEnabled
+      minGames
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ClubRulesQuery, ClubRulesQueryVariables>;
 export const SignInDocument = new TypedDocumentString(`
     mutation SignIn($input: SignInInput!) {
   signIn(input: $input) {
@@ -322,8 +539,287 @@ export const MeDocument = new TypedDocumentString(`
     email
     role
   }
+  myClubs {
+    id
+    clubId
+    role
+    status
+    club {
+      title
+    }
+  }
 }
     `) as unknown as TypedDocumentString<MeQuery, MeQueryVariables>;
+export const CreateClubDocument = new TypedDocumentString(`
+    mutation CreateClub($input: CreateClubInput!) {
+  createClub(input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateClubMutation, CreateClubMutationVariables>;
+export const UpdateClubDocument = new TypedDocumentString(`
+    mutation UpdateClub($id: Int!, $input: UpdateClubInput!) {
+  updateClub(id: $id, input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateClubMutation, UpdateClubMutationVariables>;
+export const UpdateRatingRulesDocument = new TypedDocumentString(`
+    mutation UpdateRatingRules($clubId: Int!, $rules: RatingRulesInput!) {
+  updateRatingRules(clubId: $clubId, rules: $rules) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateRatingRulesMutation, UpdateRatingRulesMutationVariables>;
+export const JoinClubDocument = new TypedDocumentString(`
+    mutation JoinClub($clubId: Int!) {
+  joinClub(clubId: $clubId) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<JoinClubMutation, JoinClubMutationVariables>;
+export const LeaveClubDocument = new TypedDocumentString(`
+    mutation LeaveClub($clubId: Int!) {
+  leaveClub(clubId: $clubId)
+}
+    `) as unknown as TypedDocumentString<LeaveClubMutation, LeaveClubMutationVariables>;
+export const ApproveClubMemberDocument = new TypedDocumentString(`
+    mutation ApproveClubMember($memberId: Int!) {
+  approveClubMember(memberId: $memberId) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<ApproveClubMemberMutation, ApproveClubMemberMutationVariables>;
+export const SetClubMemberRoleDocument = new TypedDocumentString(`
+    mutation SetClubMemberRole($memberId: Int!, $role: ClubRole!) {
+  setClubMemberRole(memberId: $memberId, role: $role) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<SetClubMemberRoleMutation, SetClubMemberRoleMutationVariables>;
+export const RemoveClubMemberDocument = new TypedDocumentString(`
+    mutation RemoveClubMember($memberId: Int!) {
+  removeClubMember(memberId: $memberId)
+}
+    `) as unknown as TypedDocumentString<RemoveClubMemberMutation, RemoveClubMemberMutationVariables>;
+export const CreateTournamentDocument = new TypedDocumentString(`
+    mutation CreateTournament($input: CreateTournamentInput!) {
+  createTournament(input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<CreateTournamentMutation, CreateTournamentMutationVariables>;
+export const UpdateTournamentDocument = new TypedDocumentString(`
+    mutation UpdateTournament($id: Int!, $input: UpdateTournamentInput!) {
+  updateTournament(id: $id, input: $input) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateTournamentMutation, UpdateTournamentMutationVariables>;
+export const DeleteTournamentDocument = new TypedDocumentString(`
+    mutation DeleteTournament($id: Int!) {
+  deleteTournament(id: $id)
+}
+    `) as unknown as TypedDocumentString<DeleteTournamentMutation, DeleteTournamentMutationVariables>;
+export const AddTournamentParticipantDocument = new TypedDocumentString(`
+    mutation AddTournamentParticipant($tournamentId: Int!, $userId: Int!) {
+  addTournamentParticipant(tournamentId: $tournamentId, userId: $userId) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<AddTournamentParticipantMutation, AddTournamentParticipantMutationVariables>;
+export const RemoveTournamentParticipantDocument = new TypedDocumentString(`
+    mutation RemoveTournamentParticipant($tournamentId: Int!, $userId: Int!) {
+  removeTournamentParticipant(tournamentId: $tournamentId, userId: $userId) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<RemoveTournamentParticipantMutation, RemoveTournamentParticipantMutationVariables>;
+export const ClubsDocument = new TypedDocumentString(`
+    query Clubs($search: String) {
+  clubs(search: $search, take: 100) {
+    id
+    title
+    region
+    description
+  }
+}
+    `) as unknown as TypedDocumentString<ClubsQuery, ClubsQueryVariables>;
+export const ClubDocument = new TypedDocumentString(`
+    query Club($id: Int!, $clubId: Int!, $from: DateTime!) {
+  club(id: $id) {
+    id
+    title
+    region
+    description
+    createdAt
+    ratingRules {
+      townWinPoints
+      mafiaWinPoints
+      neutralWinPoints
+      lossPoints
+      bonusEnabled
+      minGames
+    }
+  }
+  clubMembers(clubId: $clubId) {
+    id
+    role
+    user {
+      id
+      username
+    }
+  }
+  games(clubId: $clubId, statuses: [WAITING, IN_PROGRESS], from: $from, take: 10) {
+    id
+    status
+    phase
+    currentRound
+    startDate
+    gameType {
+      name
+      playersCount
+    }
+    players {
+      id
+    }
+    club {
+      id
+      title
+    }
+    tournament {
+      id
+      name
+    }
+  }
+  rating(clubId: $clubId, take: 10) {
+    place
+    points
+    games
+    wins
+    winRate
+    user {
+      id
+      username
+    }
+  }
+  tournaments(clubId: $clubId, take: 20) {
+    id
+    name
+    status
+    startDate
+    endDate
+  }
+}
+    `) as unknown as TypedDocumentString<ClubQuery, ClubQueryVariables>;
+export const ClubManageDocument = new TypedDocumentString(`
+    query ClubManage($id: Int!, $clubId: Int!) {
+  club(id: $id) {
+    id
+    title
+    region
+    description
+    ratingRules {
+      townWinPoints
+      mafiaWinPoints
+      neutralWinPoints
+      lossPoints
+      bonusEnabled
+      minGames
+    }
+  }
+  members: clubMembers(clubId: $clubId) {
+    id
+    role
+    createdAt
+    user {
+      id
+      username
+    }
+  }
+  pending: clubMembers(clubId: $clubId, status: PENDING) {
+    id
+    createdAt
+    user {
+      id
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<ClubManageQuery, ClubManageQueryVariables>;
+export const TournamentsDocument = new TypedDocumentString(`
+    query Tournaments($clubId: Int, $statuses: [TournamentStatus!]) {
+  tournaments(clubId: $clubId, statuses: $statuses, take: 100) {
+    id
+    name
+    status
+    startDate
+    endDate
+    club {
+      id
+      title
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<TournamentsQuery, TournamentsQueryVariables>;
+export const TournamentDocument = new TypedDocumentString(`
+    query Tournament($id: Int!) {
+  tournament(id: $id) {
+    id
+    clubId
+    name
+    description
+    status
+    startDate
+    endDate
+    club {
+      id
+      title
+    }
+    standings {
+      place
+      points
+      games
+      wins
+      user {
+        id
+        username
+      }
+    }
+    participants {
+      id
+      user {
+        id
+        username
+      }
+    }
+    games {
+      id
+      status
+      phase
+      currentRound
+      startDate
+      winnerTeam
+      gameType {
+        name
+        playersCount
+      }
+      players {
+        id
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<TournamentQuery, TournamentQueryVariables>;
+export const OpenTournamentsDocument = new TypedDocumentString(`
+    query OpenTournaments {
+  tournaments(statuses: [PLANNED, ACTIVE], take: 100) {
+    id
+    clubId
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<OpenTournamentsQuery, OpenTournamentsQueryVariables>;
 export const CreateGameDocument = new TypedDocumentString(`
     mutation CreateGame($data: CreateGameInput!) {
   createGame(data: $data) {
@@ -449,6 +945,13 @@ export const HostGamesDocument = new TypedDocumentString(`
     query HostGames {
   active: games(statuses: [WAITING, IN_PROGRESS], take: 100) {
     id
+    clubId
+    club {
+      title
+    }
+    tournament {
+      name
+    }
     status
     phase
     currentRound
@@ -461,8 +964,9 @@ export const HostGamesDocument = new TypedDocumentString(`
       id
     }
   }
-  finished: games(statuses: [FINISHED], take: 10) {
+  finished: games(statuses: [FINISHED], take: 30) {
     id
+    clubId
     startDate
     winnerTeam
     gameType {
@@ -473,6 +977,11 @@ export const HostGamesDocument = new TypedDocumentString(`
     id
     name
     playersCount
+  }
+  tournaments(statuses: [PLANNED, ACTIVE], take: 100) {
+    id
+    clubId
+    name
   }
 }
     `) as unknown as TypedDocumentString<HostGamesQuery, HostGamesQueryVariables>;
@@ -568,6 +1077,14 @@ export const UpcomingGamesDocument = new TypedDocumentString(`
     players {
       id
     }
+    club {
+      id
+      title
+    }
+    tournament {
+      id
+      name
+    }
   }
 }
     `) as unknown as TypedDocumentString<UpcomingGamesQuery, UpcomingGamesQueryVariables>;
@@ -593,6 +1110,14 @@ export const PublicGameDocument = new TypedDocumentString(`
     startDate
     finishedAt
     winnerTeam
+    club {
+      id
+      title
+    }
+    tournament {
+      id
+      name
+    }
     gameType {
       name
       playersCount
@@ -665,8 +1190,8 @@ export const PlayerProfileDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<PlayerProfileQuery, PlayerProfileQueryVariables>;
 export const RatingDocument = new TypedDocumentString(`
-    query Rating($from: DateTime, $take: Int!) {
-  rating(from: $from, take: $take) {
+    query Rating($from: DateTime, $take: Int!, $clubId: Int) {
+  rating(from: $from, take: $take, clubId: $clubId) {
     place
     points
     games

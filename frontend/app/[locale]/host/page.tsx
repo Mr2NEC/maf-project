@@ -6,18 +6,41 @@ import { PageLayout } from "@/components/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 import { Link } from "@/i18n/navigation";
 import { requireHost } from "@/lib/auth/guards";
+import { hostedClubs, isPlatformHost } from "@/lib/auth/session";
 import { request } from "@/lib/graphql/client";
 import { HostGamesQuery } from "@/lib/host/queries";
 
 export default async function HostPage({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await requireHost();
+  const user = await requireHost();
 
   const t = await getTranslations("host");
   const tGame = await getTranslations("game");
   const format = await getFormatter();
-  const { active, finished, gameTypes } = await request(HostGamesQuery);
+  const data = await request(HostGamesQuery);
+
+  // Only games this host may run: their clubs' games, club-less ones for platform hosts
+  const everything = user.role === "ADMIN";
+  const clubs = hostedClubs(user);
+  const clubIds = new Set(clubs.map((c) => c.clubId));
+  const mine = (game: { clubId?: number | null }) =>
+    everything || (game.clubId ? clubIds.has(game.clubId) : isPlatformHost(user));
+  const active = data.active.filter(mine);
+  const finished = data.finished.filter(mine).slice(0, 10);
+
+  const places = [
+    ...(isPlatformHost(user) ? [{ value: "", label: t("no-club") }] : []),
+    ...clubs.flatMap((club) => [
+      { value: `club:${club.clubId}`, label: club.title },
+      ...data.tournaments
+        .filter((tournament) => tournament.clubId === club.clubId)
+        .map((tournament) => ({
+          value: `tournament:${tournament.id}`,
+          label: `${club.title} · ${tournament.name}`,
+        })),
+    ]),
+  ];
 
   return (
     <PageLayout title={t("title")}>
@@ -34,8 +57,16 @@ export default async function HostPage({ params }: { params: Promise<{ locale: L
                 href={{ pathname: "/host/games/[id]", params: { id: game.id } }}
                 className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-3 hover:bg-muted/50"
               >
-                <span className="font-medium">
-                  {game.gameType.name} · {format.dateTime(new Date(game.startDate), { dateStyle: "medium", timeStyle: "short" })}
+                <span className="flex flex-col">
+                  <span className="font-medium">
+                    {game.gameType.name} · {format.dateTime(new Date(game.startDate), { dateStyle: "medium", timeStyle: "short" })}
+                  </span>
+                  {game.club && (
+                    <span className="text-sm text-muted-foreground">
+                      {game.club.title}
+                      {game.tournament && ` · ${game.tournament.name}`}
+                    </span>
+                  )}
                 </span>
                 <span className="flex items-center gap-2 text-sm text-muted-foreground">
                   {t("seated", { count: game.players.length, total: game.gameType.playersCount })}
@@ -67,7 +98,7 @@ export default async function HostPage({ params }: { params: Promise<{ locale: L
             <CardTitle>{t("new-game")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <CreateGameForm gameTypes={gameTypes} />
+            <CreateGameForm gameTypes={data.gameTypes} places={places} />
           </CardContent>
         </Card>
       </div>

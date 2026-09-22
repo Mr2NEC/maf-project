@@ -13,6 +13,10 @@ export const APP_HEADER_LINKS: ReadonlyArray<{
     name: "about",
   },
   {
+    href: "/clubs",
+    name: "clubs",
+  },
+  {
     href: "/calendar",
     name: "calendar",
   },
@@ -27,10 +31,6 @@ export const APP_HEADER_LINKS: ReadonlyArray<{
   {
     href: "/rating",
     name: "rating",
-  },
-  {
-    href: "/blog",
-    name: "blog",
   },
   {
     href: "/contacts",
