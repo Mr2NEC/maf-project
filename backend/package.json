@@ -21,7 +21,11 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json --passWithNoTests",
-    "seed:clubs": "nest build && node dist/cli/seed-clubs.js"
+    "seed:clubs": "nest build && node dist/cli/seed-clubs.js",
+    "migration:generate": "nest build && typeorm migration:generate -d dist/data-source.js",
+    "migration:run": "nest build && typeorm migration:run -d dist/data-source.js",
+    "migration:revert": "nest build && typeorm migration:revert -d dist/data-source.js",
+    "migration:show": "nest build && typeorm migration:show -d dist/data-source.js"
   },
   "dependencies": {
     "@apollo/server": "^5.5.1",
