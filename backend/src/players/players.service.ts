@@ -73,7 +73,6 @@ export class PlayersService {
   }
 
   async update(id: number, data: UpdatePlayerInput) {
-
     const { userId, gameId, roleId, seatNumber, username } = data;
 
     const player = await this.findOne(id);
@@ -104,7 +103,7 @@ export class PlayersService {
 
     if (seatNumber) {
       player.seatNumber = seatNumber;
-    } 
+    }
 
     if (username) {
       player.username = username;

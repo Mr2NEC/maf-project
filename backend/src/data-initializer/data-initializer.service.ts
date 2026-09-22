@@ -24,7 +24,7 @@ export class DataInitializerService {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
 
-      const contentType = headers['content-type'];
+      const contentType = String(headers['content-type'] ?? '');
       const format = contentType?.split('/')[1] || 'unknown';
 
       const filePath = path.join(uploadDir, `${filename}.${format}`);

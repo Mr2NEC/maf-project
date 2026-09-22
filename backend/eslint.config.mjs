@@ -20,7 +20,6 @@ export default tseslint.config(
       ecmaVersion: 5,
       sourceType: 'module',
       parserOptions: {
-        project: ['tsconfig.json', 'tsconfig.spec.json'],
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
@@ -43,9 +42,9 @@ export default tseslint.config(
         {
           checksVoidReturn: false,
           checksConditionals: false,
-          endOfLine: 'auto',
         },
       ],
+      'prettier/prettier': ['error', { endOfLine: 'auto' }],
       '@typescript-eslint/require-await': 'warn',
       '@typescript-eslint/prefer-promise-reject-errors': 'off',
       '@typescript-eslint/no-base-to-string': 'off',

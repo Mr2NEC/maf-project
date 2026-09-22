@@ -1,6 +1,10 @@
 {
+  "private": true,
   "scripts": {
-    "docker-compose-up-dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d",
-    "docker-compose-down": "docker-compose down --volumes --remove-orphans"
+    "dev": "docker compose --env-file ./.env.dev -f docker-compose.yml up --build",
+    "dev:up": "docker compose --env-file ./.env.dev -f docker-compose.yml up -d",
+    "dev:down": "docker compose --env-file ./.env.dev -f docker-compose.yml down",
+    "db:up": "docker compose --env-file ./.env.dev -f docker-compose.yml up -d mysql",
+    "check": "npm run check --prefix backend && npm run check --prefix frontend"
   }
 }

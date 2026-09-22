@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -16,7 +16,10 @@ import { User } from 'src/users/entities/user.entity';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('jwt.secret'),
         signOptions: {
-          expiresIn: configService.get<string>('jwt.expiresIn'),
+          // Validated format like '60m' (see config/jwt.config.ts)
+          expiresIn: configService.get<string>(
+            'jwt.expiresIn',
+          ) as JwtSignOptions['expiresIn'],
         },
       }),
     }),

@@ -48,7 +48,7 @@ export class ActionsService {
       throw new BadRequestException('Targets are required');
     }
 
-    const action = await this.actionsRepository.create({
+    const action = this.actionsRepository.create({
       game,
       actor,
       actionType,
