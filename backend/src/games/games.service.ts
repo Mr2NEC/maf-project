@@ -1,22 +1,18 @@
-import { PaginationArgs } from 'src/common/dto/pagination.args';
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Game } from './entities/game.entity';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CreateGameInput } from './dto/create-game.input';
-import { GameTypesService } from 'src/game-types/game-types.service';
-import { UpdateGameInput } from './dto/update-game.input';
+import { EntityNotFoundError, Repository } from 'typeorm';
+import { PaginationArgs } from 'src/common/dto/pagination.args';
 import { DateUtils } from 'src/common/utils/date.utils';
+import { GameTypesService } from 'src/game-types/game-types.service';
+import { CreateGameInput } from './dto/create-game.input';
+import { UpdateGameInput } from './dto/update-game.input';
+import { Game } from './entities/game.entity';
 
 @Injectable()
 export class GamesService {
   constructor(
-    @InjectRepository(Game) private gamesRepository: Repository<Game>,
-    private gameTypesRepository: GameTypesService,
+    @InjectRepository(Game) private readonly gamesRepository: Repository<Game>,
+    private readonly gameTypesService: GameTypesService,
   ) {}
 
   findAll({ skip, take }: PaginationArgs): Promise<Game[]> {
@@ -34,70 +30,58 @@ export class GamesService {
       relations: ['gameType', 'players'],
     });
     if (!game) {
-      throw new NotFoundException('Game not found');
+      throw new EntityNotFoundError(Game, { id });
     }
     return game;
   }
 
-  async create(data: CreateGameInput): Promise<Game> {
-    const { gameTypeId, startDate } = data;
+  async create({ gameTypeId, startDate }: CreateGameInput): Promise<Game> {
+    assertNotInPast(startDate);
+    // Throws NotFound for an unknown game type
+    const gameType = await this.gameTypesService.findOne(gameTypeId);
 
-    if (!gameTypeId) {
-      throw new BadRequestException('Game type is required');
-    }
-
-    const gameType = await this.gameTypesRepository.findOne(gameTypeId);
-
-    if (!DateUtils.isTodayOrFuture(startDate)) {
-      throw new BadRequestException(
-        'Start date must be today or in the future',
-      );
-    }
-
-    const newGame = this.gamesRepository.create({ gameType, startDate });
-    return this.gamesRepository.save(newGame);
+    const game = this.gamesRepository.create({ gameType, startDate });
+    return this.gamesRepository.save(game);
   }
 
-  async update(id: number, data: UpdateGameInput): Promise<Game> {
-    const { gameTypeId, startDate, status, currentRound } = data;
+  async update(id: number, input: UpdateGameInput): Promise<Game> {
+    const { gameTypeId, startDate, status, currentRound } = input;
     const game = await this.findOne(id);
 
-    if (!game) {
-      throw new NotFoundException('Game not found');
+    if (gameTypeId !== undefined && gameTypeId !== game.gameType.id) {
+      game.gameType = await this.gameTypesService.findOne(gameTypeId);
     }
 
-    if (gameTypeId && gameTypeId !== game.gameType.id) {
-      const gameType = await this.gameTypesRepository.findOne(gameTypeId);
-      if (!gameType) {
-        throw new NotFoundException('Game type not found');
-      }
-      game.gameType = gameType;
-    }
-
-    if (startDate && !DateUtils.isTodayOrFuture(startDate)) {
-      throw new BadRequestException(
-        'Start date must be today or in the future',
-      );
-    } else if (startDate) {
+    if (startDate !== undefined) {
+      assertNotInPast(startDate);
       game.startDate = startDate;
     }
 
-    if (status) {
+    if (status !== undefined) {
       game.status = status;
     }
 
-    if (currentRound && currentRound >= game.currentRound) {
+    if (currentRound !== undefined) {
+      if (currentRound < game.currentRound) {
+        throw new BadRequestException(
+          `Round cannot go back from ${game.currentRound} to ${currentRound}`,
+        );
+      }
       game.currentRound = currentRound;
     }
 
     return this.gamesRepository.save(game);
   }
 
-  async delete(id: number) {
+  async delete(id: number): Promise<Game> {
     const game = await this.findOne(id);
-    if (!game) {
-      throw new NotFoundException('Game not found');
-    }
-    return this.gamesRepository.delete(id);
+    await this.gamesRepository.delete(id);
+    return game;
+  }
+}
+
+function assertNotInPast(date: Date): void {
+  if (!DateUtils.isTodayOrFuture(date)) {
+    throw new BadRequestException('Start date must be today or in the future');
   }
 }
