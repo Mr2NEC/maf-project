@@ -46,8 +46,8 @@ services:
     networks:
       - app-network-dev
     volumes:
-      - ./backend:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./backend:/app
+      - /app/node_modules
 
   frontend:
     build:
@@ -67,8 +67,8 @@ services:
     networks:
       - app-network-dev
     volumes:
-      - ./frontend:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./frontend:/app
+      - /app/node_modules
 
 networks:
   app-network-dev:

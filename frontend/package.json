@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run typecheck && npm run build",
     "storybook": "storybook dev -p 6006",
-    "i18nexus": " i18nexus pull",
     "build-storybook": "storybook build"
   },
   "dependencies": {
@@ -30,7 +31,6 @@
     "@eslint/eslintrc": "^3",
     "@storybook/addon-essentials": "^8.5.4",
     "@storybook/addon-interactions": "^8.5.4",
-    "@storybook/addon-onboarding": "^8.5.4",
     "@storybook/blocks": "^8.5.4",
     "@storybook/nextjs": "^8.5.4",
     "@storybook/react": "^8.5.4",
