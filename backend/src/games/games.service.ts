@@ -41,6 +41,7 @@ export class GamesService {
       relations: [
         'gameType',
         'club',
+        'tournament',
         'players',
         'players.user',
         'players.role',
