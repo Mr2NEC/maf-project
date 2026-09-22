@@ -1,3 +1,5 @@
+import { Like } from 'typeorm';
+import { containsPattern } from 'src/common/utils/like';
 import { PaginationArgs } from 'src/common/dto/pagination.args';
 import { ForbiddenException } from '@nestjs/common';
 import {
@@ -24,8 +26,16 @@ export class UsersResolver {
 
   @Public()
   @Query(() => [User], { name: 'users' })
-  findAll(@Args() { skip, take }: PaginationArgs) {
-    return this.usersService.findAll({ skip, take, order: { id: 'ASC' } });
+  findAll(
+    @Args() { skip, take }: PaginationArgs,
+    @Args('search', { nullable: true }) search?: string,
+  ) {
+    return this.usersService.findAll({
+      where: search ? { username: Like(containsPattern(search)) } : {},
+      skip,
+      take,
+      order: search ? { username: 'ASC' } : { id: 'ASC' },
+    });
   }
 
   @Public()

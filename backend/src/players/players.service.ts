@@ -53,13 +53,13 @@ export class PlayersService {
   async findOne(id: number) {
     return this.playersRepository.findOne({
       where: { id },
-      relations: ['user', 'game', 'role'],
+      relations: ['user', 'game', 'game.gameType', 'role'],
     });
   }
 
   async findAll(options?: FindManyOptions<Player>) {
     return this.playersRepository.find({
-      relations: ['user', 'game', 'role'],
+      relations: ['user', 'game', 'game.gameType', 'role'],
       ...options,
     });
   }

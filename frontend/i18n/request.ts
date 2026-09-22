@@ -12,5 +12,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   return {
     locale,
     messages: (await import(`../messages/${locale}.json`)).default,
+    // Dates are shown in the club's time zone, not the server's (UTC in docker)
+    timeZone: process.env.APP_TIME_ZONE ?? "Europe/Kyiv",
   };
 });

@@ -41,6 +41,8 @@ services:
       GRAPHQL_CORS: ${GRAPHQL_CORS}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      # The frontend server forwards visitor IPs from the private docker network
+      TRUST_PROXY: uniquelocal
     ports:
       - "${BACKEND_PORT}:4000"
     depends_on:
@@ -61,7 +63,8 @@ services:
       NODE_ENV: development
       WATCHPACK_POLLING: true
       CHOKIDAR_USEPOLLING: true
-      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT}${GRAPHQL_PATH}
+      # Used by the Next.js server; the browser never calls the API directly
+      API_URL: http://backend:4000${GRAPHQL_PATH}
     ports:
       - "3000:3000"
     depends_on:
@@ -71,6 +74,8 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      # Keep the dev server output apart from builds run on the host
+      - /app/.next
 
 networks:
   app-network-dev:

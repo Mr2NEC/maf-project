@@ -307,18 +307,28 @@ type Query {
   gameTypeRole(id: Int!): GameTypeRole!
   gameTypeRoles: [GameTypeRole!]!
   gameTypes: [GameType!]!
-  games(skip: Int! = 0, take: Int! = 50): [Game!]!
+  games(from: DateTime, skip: Int! = 0, statuses: [GameStatus!], take: Int! = 50): [Game!]!
   me: User!
   place: [Place!]!
   player(id: Int!): Player!
-  players(skip: Int! = 0, take: Int! = 50): [Player!]!
+  players(skip: Int! = 0, take: Int! = 50, userId: Int): [Player!]!
+  rating(from: DateTime, skip: Int! = 0, take: Int! = 50, to: DateTime): [RatingEntry!]!
   role(id: Int!): Role!
   roleAction(id: Int!): RoleAction!
   roleActions: [RoleAction!]!
   roles: [Role!]!
   social: [Social!]!
   user(id: Int!): User!
-  users(skip: Int! = 0, take: Int! = 50): [User!]!
+  users(search: String, skip: Int! = 0, take: Int! = 50): [User!]!
+}
+
+type RatingEntry {
+  games: Int!
+  place: Int!
+  points: Float!
+  user: User!
+  winRate: Float!
+  wins: Int!
 }
 
 type Role {
@@ -417,7 +427,7 @@ type User {
   email: String
   id: ID!
   players: [Player!]!
-  profile: Profile!
+  profile: Profile
   profileId: Int
   role: UserRole!
   socials: [Social!]!

@@ -50,10 +50,11 @@ export class User {
   @Column({ name: 'profile_id', nullable: true })
   profileId: number;
 
-  @Field(() => Profile)
+  // Users created before profiles existed may have none
+  @Field(() => Profile, { nullable: true })
   @OneToOne(() => Profile, profile => profile.user, { cascade: true })
   @JoinColumn({ name: 'profile_id' })
-  profile: Profile;
+  profile: Profile | null;
 
   @Field(() => [Social], { defaultValue: [] })
   @OneToMany(() => Social, social => social.user)

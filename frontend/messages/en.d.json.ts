@@ -28,25 +28,57 @@ declare const messages: {
     "uk": "Ukrainian"
   },
   "index-page": {
-    "title": "Home page"
+    "title": "Mafia club",
+    "lead": "Games calendar, player profiles and the club rating. Hosts run games from their own panel.",
+    "next-games": "Next games",
+    "all-games": "Calendar",
+    "top-players": "Top players",
+    "full-rating": "Full rating"
   },
   "about-page": {
     "title": "About us page"
   },
   "calendar-page": {
-    "title": "Calendar page"
+    "title": "Calendar",
+    "description": "Upcoming and running games"
   },
   "tournaments-page": {
     "title": "Tournaments page"
   },
   "players-page": {
-    "title": "Players page"
+    "title": "Players",
+    "search": "Search by nickname",
+    "find": "Find",
+    "empty": "Nobody found",
+    "member-since": "With the club since {date}",
+    "previous": "Previous",
+    "next": "Next"
   },
   "player-page": {
-    "title": "Player page"
+    "title": "Player",
+    "member-since": "With the club since {date}",
+    "games": "Games",
+    "wins": "Wins",
+    "points": "Points",
+    "win-rate": "Win rate",
+    "history": "Games",
+    "no-games": "No games yet",
+    "date": "Date",
+    "game": "Game",
+    "role": "Role",
+    "result": "Result",
+    "won": "Win",
+    "lost": "Loss"
   },
   "rating-page": {
-    "title": "Rating page"
+    "title": "Rating",
+    "period": "Period",
+    "periods": {
+      "all": "All time",
+      "year": "This year",
+      "month": "This month"
+    },
+    "rules": "1 point for a win plus bonus points from the host. Ties are broken by wins, then by fewer games."
   },
   "blog-page": {
     "title": "Blog page"
@@ -56,6 +88,134 @@ declare const messages: {
   },
   "locale-layout": {
     "title": "Maf App"
+  },
+  "auth": {
+    "login-title": "Sign in",
+    "register-title": "Create an account",
+    "username": "Nickname",
+    "email": "Email",
+    "password": "Password",
+    "password-hint": "At least 8 characters, no spaces",
+    "sign-in": "Sign in",
+    "sign-up": "Sign up",
+    "sign-out": "Sign out",
+    "host-panel": "Host panel",
+    "no-account": "No account yet?",
+    "have-account": "Already have an account?",
+    "errors": {
+      "invalid_credentials": "Wrong email or password",
+      "email_taken": "This email is already registered",
+      "invalid_input": "Please check the form",
+      "too_many_requests": "Too many attempts. Try again in a minute",
+      "unknown": "Something went wrong. Try again later"
+    }
+  },
+  "game": {
+    "status": {
+      "WAITING": "Registration",
+      "IN_PROGRESS": "In progress",
+      "FINISHED": "Finished",
+      "CANCELLED": "Cancelled"
+    },
+    "phase": {
+      "NIGHT": "Night {round, number}",
+      "DAY": "Day {round, number}"
+    },
+    "team": {
+      "TOWN": "town",
+      "MAFIA": "mafia",
+      "NEUTRAL": "neutral"
+    },
+    "winner": {
+      "TOWN": "The town wins",
+      "MAFIA": "The mafia wins",
+      "NEUTRAL": "The maniac wins"
+    },
+    "player-status": {
+      "ALIVE": "In the game",
+      "KILLED": "Killed at night",
+      "VOTED_OUT": "Voted out",
+      "DISQUALIFIED": "Disqualified"
+    }
+  },
+  "host": {
+    "title": "Host panel",
+    "active-games": "Upcoming and running games",
+    "no-active-games": "No games yet. Create one on the right.",
+    "recent-games": "Recently finished",
+    "new-game": "New game",
+    "game-type": "Game type",
+    "start-date": "Start",
+    "create-game": "Create game",
+    "seated": "{count, number}/{total, number} seated",
+    "table": "Table",
+    "player": "Player",
+    "role": "Role",
+    "fouls": "Fouls",
+    "add-foul": "+ foul",
+    "remove": "Remove",
+    "round": "round {round, number}",
+    "seating": "Seating",
+    "search-player": "Player nickname",
+    "search": "Find",
+    "roles": "Roles",
+    "deal-random": "Deal roles randomly",
+    "deal-manual": "Enter roles from the cards",
+    "save-roles": "Save roles",
+    "start-game": "Start the game",
+    "start-hint": "Deal roles to start the game",
+    "cancel-game": "Cancel game",
+    "cancel-confirm": "Cancel this game? This cannot be undone.",
+    "cancelled": "The game was cancelled.",
+    "who-acts": "Who acts",
+    "action": "Action",
+    "target": "On whom",
+    "record-action": "Record action",
+    "this-night": "This night",
+    "quiet-night": "No actions yet",
+    "end-night": "End the night",
+    "no-vote": "did not vote",
+    "tally": "Votes",
+    "tie": "Tie between {players}",
+    "eliminate-all": "Everyone leaves",
+    "keep-all": "Everyone stays",
+    "revote": "Revote",
+    "end-day": "End the day",
+    "end-day-no-vote": "End the day without a vote",
+    "events": "What happened",
+    "killed": "Killed: {players}",
+    "nobody-killed": "Nobody was killed",
+    "saved": "Saved by the doctor: {players}",
+    "blocked": "Blocked: {players}",
+    "check": "{actor} checked {target}: {result}",
+    "check-blocked": "blocked, no result",
+    "voted-out": "Voted out: {players}",
+    "nobody-voted-out": "Nobody was voted out",
+    "bonus-player": "Bonus to",
+    "bonus-points": "Points",
+    "add-bonus": "Add bonus"
+  },
+  "games": {
+    "no-upcoming": "No games scheduled yet",
+    "free-seats": "{count, plural, one {# seat left} other {# seats left}}",
+    "full": "Table is full"
+  },
+  "rating": {
+    "empty": "No finished games yet",
+    "player": "Player",
+    "points": "Points",
+    "games": "Games",
+    "wins": "Wins",
+    "win-rate": "Win rate"
+  },
+  "game-page": {
+    "title": "Game: {type}",
+    "no-players": "Nobody has been seated yet",
+    "player": "Player",
+    "role": "Role",
+    "status": "Status",
+    "points": "Points",
+    "hidden-role": "hidden until the end"
   }
 };
 export default messages;

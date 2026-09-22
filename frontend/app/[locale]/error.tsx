@@ -1,6 +1,6 @@
 "use client";
 
-import { PageLayout } from "@/components/shared";
+import { PageLayout } from "@/components/shared/page-layout";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
@@ -23,7 +23,7 @@ export default function Error({ error, reset }: ErrorProps) {
           p: (chunks) => <p className="mt-4">{chunks}</p>,
           retry: (chunks) => (
             <button
-              className="text-white underline underline-offset-2"
+              className="underline underline-offset-2"
               onClick={reset}
               type="button"
             >

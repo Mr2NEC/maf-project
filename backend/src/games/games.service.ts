@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityNotFoundError, Repository } from 'typeorm';
-import { PaginationArgs } from 'src/common/dto/pagination.args';
+import { EntityNotFoundError, In, MoreThanOrEqual, Repository } from 'typeorm';
 import { DateUtils } from 'src/common/utils/date.utils';
 import { GameTypesService } from 'src/game-types/game-types.service';
 import { CreateGameInput } from './dto/create-game.input';
+import { GamesFilterArgs } from './dto/games-filter.args';
 import { UpdateGameInput } from './dto/update-game.input';
 import { GameStatus } from 'src/enums/game-status.enum';
 import { Game } from './entities/game.entity';
@@ -16,10 +16,17 @@ export class GamesService {
     private readonly gameTypesService: GameTypesService,
   ) {}
 
-  findAll({ skip, take }: PaginationArgs): Promise<Game[]> {
+  findAll({ skip, take, statuses, from }: GamesFilterArgs): Promise<Game[]> {
     return this.gamesRepository.find({
+      where: {
+        ...(statuses?.length && { status: In(statuses) }),
+        ...(from && { startDate: MoreThanOrEqual(from) }),
+      },
       relations: ['gameType', 'players', 'players.user', 'players.role'],
-      order: { startDate: 'DESC', id: 'DESC' },
+      // Upcoming games soonest first, otherwise newest first
+      order: from
+        ? { startDate: 'ASC', id: 'ASC' }
+        : { startDate: 'DESC', id: 'DESC' },
       skip,
       take,
     });
@@ -28,7 +35,14 @@ export class GamesService {
   async findOne(id: number): Promise<Game> {
     const game = await this.gamesRepository.findOne({
       where: { id },
-      relations: ['gameType', 'players', 'players.user', 'players.role'],
+      relations: [
+        'gameType',
+        'gameType.gameTypeRoles',
+        'gameType.gameTypeRoles.role',
+        'players',
+        'players.user',
+        'players.role',
+      ],
       order: { players: { seatNumber: 'ASC' } },
     });
     if (!game) {

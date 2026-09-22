@@ -47,7 +47,9 @@ export class RolesService {
   ) {
     const findOptions: FindManyOptions<Role> = {
       ...options,
-      relations: includeRelations ? ['actions', 'gameTypeRoles'] : [],
+      relations: includeRelations
+        ? ['actions', 'actions.actionType', 'gameTypeRoles']
+        : [],
     };
     return this.rolesRepository.find(findOptions);
   }
@@ -55,7 +57,7 @@ export class RolesService {
   async findOne(id: number) {
     const role = await this.rolesRepository.findOne({
       where: { id },
-      relations: ['actions', 'gameTypeRoles'],
+      relations: ['actions', 'actions.actionType', 'gameTypeRoles'],
     });
     if (!role) {
       throw new NotFoundException(`Role with id ${id} not found`);

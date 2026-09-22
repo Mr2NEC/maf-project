@@ -25,25 +25,57 @@
     "uk": "Українська"
   },
   "index-page": {
-    "title": "Домашня сторінка"
+    "title": "Клуб мафії",
+    "lead": "Календар ігор, профілі гравців і рейтинг клубу. Ведучі проводять ігри у власній панелі.",
+    "next-games": "Найближчі ігри",
+    "all-games": "Календар",
+    "top-players": "Найкращі гравці",
+    "full-rating": "Весь рейтинг"
   },
   "about-page": {
     "title": "Сторінка про нас"
   },
   "calendar-page": {
-    "title": "Сторінка календаря"
+    "title": "Календар",
+    "description": "Найближчі та поточні ігри"
   },
   "tournaments-page": {
     "title": "Сторінка турнірів"
   },
   "players-page": {
-    "title": "Сторінка гравців"
+    "title": "Гравці",
+    "search": "Пошук за нікнеймом",
+    "find": "Знайти",
+    "empty": "Нікого не знайдено",
+    "member-since": "У клубі з {date}",
+    "previous": "Назад",
+    "next": "Далі"
   },
   "player-page": {
-    "title": "Сторінка гравця"
+    "title": "Гравець",
+    "member-since": "У клубі з {date}",
+    "games": "Ігри",
+    "wins": "Перемоги",
+    "points": "Бали",
+    "win-rate": "Відсоток перемог",
+    "history": "Ігри",
+    "no-games": "Ігор ще немає",
+    "date": "Дата",
+    "game": "Гра",
+    "role": "Роль",
+    "result": "Результат",
+    "won": "Перемога",
+    "lost": "Поразка"
   },
   "rating-page": {
-    "title": "Сторінка рейтингу"
+    "title": "Рейтинг",
+    "period": "Період",
+    "periods": {
+      "all": "За весь час",
+      "year": "Цей рік",
+      "month": "Цей місяць"
+    },
+    "rules": "1 бал за перемогу плюс бонуси від ведучого. За рівних балів вище той, хто має більше перемог, потім — менше ігор."
   },
   "blog-page": {
     "title": "Сторінка блогу"
@@ -53,5 +85,133 @@
   },
   "locale-layout": {
     "title": "Maf App"
+  },
+  "auth": {
+    "login-title": "Вхід",
+    "register-title": "Реєстрація",
+    "username": "Нікнейм",
+    "email": "Email",
+    "password": "Пароль",
+    "password-hint": "Щонайменше 8 символів, без пробілів",
+    "sign-in": "Увійти",
+    "sign-up": "Зареєструватися",
+    "sign-out": "Вийти",
+    "host-panel": "Панель ведучого",
+    "no-account": "Ще немає акаунта?",
+    "have-account": "Вже маєте акаунт?",
+    "errors": {
+      "invalid_credentials": "Неправильний email або пароль",
+      "email_taken": "Цей email уже зареєстровано",
+      "invalid_input": "Перевірте дані у формі",
+      "too_many_requests": "Забагато спроб. Спробуйте за хвилину",
+      "unknown": "Щось пішло не так. Спробуйте пізніше"
+    }
+  },
+  "game": {
+    "status": {
+      "WAITING": "Реєстрація",
+      "IN_PROGRESS": "Триває",
+      "FINISHED": "Завершена",
+      "CANCELLED": "Скасована"
+    },
+    "phase": {
+      "NIGHT": "Ніч {round, number}",
+      "DAY": "День {round, number}"
+    },
+    "team": {
+      "TOWN": "місто",
+      "MAFIA": "мафія",
+      "NEUTRAL": "нейтрал"
+    },
+    "winner": {
+      "TOWN": "Перемогло місто",
+      "MAFIA": "Перемогла мафія",
+      "NEUTRAL": "Переміг маніяк"
+    },
+    "player-status": {
+      "ALIVE": "У грі",
+      "KILLED": "Вбитий уночі",
+      "VOTED_OUT": "Вигнаний голосуванням",
+      "DISQUALIFIED": "Дискваліфікований"
+    }
+  },
+  "host": {
+    "title": "Панель ведучого",
+    "active-games": "Найближчі та поточні ігри",
+    "no-active-games": "Ігор ще немає. Створіть гру праворуч.",
+    "recent-games": "Нещодавно завершені",
+    "new-game": "Нова гра",
+    "game-type": "Тип гри",
+    "start-date": "Початок",
+    "create-game": "Створити гру",
+    "seated": "{count, number}/{total, number} за столом",
+    "table": "Стіл",
+    "player": "Гравець",
+    "role": "Роль",
+    "fouls": "Фоли",
+    "add-foul": "+ фол",
+    "remove": "Прибрати",
+    "round": "коло {round, number}",
+    "seating": "Розсадка",
+    "search-player": "Нікнейм гравця",
+    "search": "Знайти",
+    "roles": "Ролі",
+    "deal-random": "Роздати ролі випадково",
+    "deal-manual": "Внести ролі з карток",
+    "save-roles": "Зберегти ролі",
+    "start-game": "Почати гру",
+    "start-hint": "Роздайте ролі, щоб почати гру",
+    "cancel-game": "Скасувати гру",
+    "cancel-confirm": "Скасувати цю гру? Це не можна відмінити.",
+    "cancelled": "Гру скасовано.",
+    "who-acts": "Хто діє",
+    "action": "Дія",
+    "target": "На кого",
+    "record-action": "Записати дію",
+    "this-night": "Ця ніч",
+    "quiet-night": "Дій ще немає",
+    "end-night": "Завершити ніч",
+    "no-vote": "не голосував",
+    "tally": "Голоси",
+    "tie": "Нічия: {players}",
+    "eliminate-all": "Вибувають усі",
+    "keep-all": "Залишаються всі",
+    "revote": "Переголосувати",
+    "end-day": "Завершити день",
+    "end-day-no-vote": "Завершити день без голосування",
+    "events": "Що сталося",
+    "killed": "Вбито: {players}",
+    "nobody-killed": "Нікого не вбито",
+    "saved": "Лікар врятував: {players}",
+    "blocked": "Заблоковано: {players}",
+    "check": "{actor} перевірив {target}: {result}",
+    "check-blocked": "заблоковано, без результату",
+    "voted-out": "Вигнано: {players}",
+    "nobody-voted-out": "Нікого не вигнали",
+    "bonus-player": "Бонус гравцю",
+    "bonus-points": "Бали",
+    "add-bonus": "Додати бонус"
+  },
+  "games": {
+    "no-upcoming": "Ігор поки не заплановано",
+    "free-seats": "{count, plural, one {# вільне місце} few {# вільні місця} many {# вільних місць} other {# вільного місця}}",
+    "full": "Стіл заповнено"
+  },
+  "rating": {
+    "empty": "Завершених ігор ще немає",
+    "player": "Гравець",
+    "points": "Бали",
+    "games": "Ігри",
+    "wins": "Перемоги",
+    "win-rate": "Відсоток перемог"
+  },
+  "game-page": {
+    "title": "Гра: {type}",
+    "no-players": "За столом ще нікого немає",
+    "player": "Гравець",
+    "role": "Роль",
+    "status": "Стан",
+    "points": "Бали",
+    "hidden-role": "прихована до кінця гри"
   }
 }
