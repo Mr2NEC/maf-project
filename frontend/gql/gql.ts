@@ -34,6 +34,12 @@ type Documents = {
     "\n  query HostGame($id: Float!) {\n    game(id: $id) {\n      id\n      status\n      phase\n      currentRound\n      startDate\n      winnerTeam\n      gameType {\n        id\n        name\n        playersCount\n        maxFouls\n        gameTypeRoles {\n          count\n          role {\n            id\n            name\n            team\n          }\n        }\n      }\n      players {\n        id\n        userId\n        seatNumber\n        username\n        status\n        fouls\n        points\n        eliminatedRound\n        role {\n          id\n          name\n          team\n        }\n      }\n    }\n    roles {\n      id\n      actions {\n        actionType {\n          id\n          name\n          effect\n          phase\n        }\n      }\n    }\n  }\n": typeof types.HostGameDocument,
     "\n  query NightActions($gameId: Int!) {\n    actions(gameId: $gameId, take: 100) {\n      id\n      round\n      phase\n      actorId\n      actionType {\n        name\n        effect\n      }\n      targets {\n        targetId\n      }\n    }\n  }\n": typeof types.NightActionsDocument,
     "\n  query SearchUsers($search: String!) {\n    users(search: $search, take: 10) {\n      id\n      username\n    }\n  }\n": typeof types.SearchUsersDocument,
+    "\n  query UpcomingGames($from: DateTime!, $take: Int!) {\n    games(statuses: [WAITING, IN_PROGRESS], from: $from, take: $take) {\n      id\n      status\n      phase\n      currentRound\n      startDate\n      gameType {\n        name\n        playersCount\n      }\n      players {\n        id\n      }\n    }\n  }\n": typeof types.UpcomingGamesDocument,
+    "\n  query RecentGames($take: Int!) {\n    games(statuses: [FINISHED], take: $take) {\n      id\n      startDate\n      winnerTeam\n      gameType {\n        name\n      }\n    }\n  }\n": typeof types.RecentGamesDocument,
+    "\n  query PublicGame($id: Float!) {\n    game(id: $id) {\n      id\n      status\n      phase\n      currentRound\n      startDate\n      finishedAt\n      winnerTeam\n      gameType {\n        name\n        playersCount\n      }\n      players {\n        id\n        userId\n        seatNumber\n        username\n        status\n        fouls\n        points\n        eliminatedRound\n        role {\n          name\n          team\n        }\n      }\n    }\n  }\n": typeof types.PublicGameDocument,
+    "\n  query Players($search: String, $skip: Int!, $take: Int!) {\n    users(search: $search, skip: $skip, take: $take) {\n      id\n      username\n      createdAt\n      club {\n        title\n      }\n    }\n  }\n": typeof types.PlayersDocument,
+    "\n  query PlayerProfile($id: Int!) {\n    user(id: $id) {\n      id\n      username\n      createdAt\n      profile {\n        firstName\n        lastName\n      }\n      club {\n        title\n      }\n      socials {\n        type\n        link\n      }\n    }\n    players(userId: $id, take: 50) {\n      id\n      status\n      points\n      role {\n        name\n        team\n      }\n      game {\n        id\n        status\n        startDate\n        winnerTeam\n        gameType {\n          name\n        }\n      }\n    }\n  }\n": typeof types.PlayerProfileDocument,
+    "\n  query Rating($from: DateTime, $take: Int!) {\n    rating(from: $from, take: $take) {\n      place\n      points\n      games\n      wins\n      winRate\n      user {\n        id\n        username\n      }\n    }\n  }\n": typeof types.RatingDocument,
 };
 const documents: Documents = {
     "\n  mutation SignIn($input: SignInInput!) {\n    signIn(input: $input) {\n      accessToken\n      role\n    }\n  }\n": types.SignInDocument,
@@ -55,6 +61,12 @@ const documents: Documents = {
     "\n  query HostGame($id: Float!) {\n    game(id: $id) {\n      id\n      status\n      phase\n      currentRound\n      startDate\n      winnerTeam\n      gameType {\n        id\n        name\n        playersCount\n        maxFouls\n        gameTypeRoles {\n          count\n          role {\n            id\n            name\n            team\n          }\n        }\n      }\n      players {\n        id\n        userId\n        seatNumber\n        username\n        status\n        fouls\n        points\n        eliminatedRound\n        role {\n          id\n          name\n          team\n        }\n      }\n    }\n    roles {\n      id\n      actions {\n        actionType {\n          id\n          name\n          effect\n          phase\n        }\n      }\n    }\n  }\n": types.HostGameDocument,
     "\n  query NightActions($gameId: Int!) {\n    actions(gameId: $gameId, take: 100) {\n      id\n      round\n      phase\n      actorId\n      actionType {\n        name\n        effect\n      }\n      targets {\n        targetId\n      }\n    }\n  }\n": types.NightActionsDocument,
     "\n  query SearchUsers($search: String!) {\n    users(search: $search, take: 10) {\n      id\n      username\n    }\n  }\n": types.SearchUsersDocument,
+    "\n  query UpcomingGames($from: DateTime!, $take: Int!) {\n    games(statuses: [WAITING, IN_PROGRESS], from: $from, take: $take) {\n      id\n      status\n      phase\n      currentRound\n      startDate\n      gameType {\n        name\n        playersCount\n      }\n      players {\n        id\n      }\n    }\n  }\n": types.UpcomingGamesDocument,
+    "\n  query RecentGames($take: Int!) {\n    games(statuses: [FINISHED], take: $take) {\n      id\n      startDate\n      winnerTeam\n      gameType {\n        name\n      }\n    }\n  }\n": types.RecentGamesDocument,
+    "\n  query PublicGame($id: Float!) {\n    game(id: $id) {\n      id\n      status\n      phase\n      currentRound\n      startDate\n      finishedAt\n      winnerTeam\n      gameType {\n        name\n        playersCount\n      }\n      players {\n        id\n        userId\n        seatNumber\n        username\n        status\n        fouls\n        points\n        eliminatedRound\n        role {\n          name\n          team\n        }\n      }\n    }\n  }\n": types.PublicGameDocument,
+    "\n  query Players($search: String, $skip: Int!, $take: Int!) {\n    users(search: $search, skip: $skip, take: $take) {\n      id\n      username\n      createdAt\n      club {\n        title\n      }\n    }\n  }\n": types.PlayersDocument,
+    "\n  query PlayerProfile($id: Int!) {\n    user(id: $id) {\n      id\n      username\n      createdAt\n      profile {\n        firstName\n        lastName\n      }\n      club {\n        title\n      }\n      socials {\n        type\n        link\n      }\n    }\n    players(userId: $id, take: 50) {\n      id\n      status\n      points\n      role {\n        name\n        team\n      }\n      game {\n        id\n        status\n        startDate\n        winnerTeam\n        gameType {\n          name\n        }\n      }\n    }\n  }\n": types.PlayerProfileDocument,
+    "\n  query Rating($from: DateTime, $take: Int!) {\n    rating(from: $from, take: $take) {\n      place\n      points\n      games\n      wins\n      winRate\n      user {\n        id\n        username\n      }\n    }\n  }\n": types.RatingDocument,
 };
 
 /**
@@ -133,6 +145,30 @@ export function graphql(source: "\n  query NightActions($gameId: Int!) {\n    ac
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query SearchUsers($search: String!) {\n    users(search: $search, take: 10) {\n      id\n      username\n    }\n  }\n"): typeof import('./graphql').SearchUsersDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query UpcomingGames($from: DateTime!, $take: Int!) {\n    games(statuses: [WAITING, IN_PROGRESS], from: $from, take: $take) {\n      id\n      status\n      phase\n      currentRound\n      startDate\n      gameType {\n        name\n        playersCount\n      }\n      players {\n        id\n      }\n    }\n  }\n"): typeof import('./graphql').UpcomingGamesDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query RecentGames($take: Int!) {\n    games(statuses: [FINISHED], take: $take) {\n      id\n      startDate\n      winnerTeam\n      gameType {\n        name\n      }\n    }\n  }\n"): typeof import('./graphql').RecentGamesDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query PublicGame($id: Float!) {\n    game(id: $id) {\n      id\n      status\n      phase\n      currentRound\n      startDate\n      finishedAt\n      winnerTeam\n      gameType {\n        name\n        playersCount\n      }\n      players {\n        id\n        userId\n        seatNumber\n        username\n        status\n        fouls\n        points\n        eliminatedRound\n        role {\n          name\n          team\n        }\n      }\n    }\n  }\n"): typeof import('./graphql').PublicGameDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query Players($search: String, $skip: Int!, $take: Int!) {\n    users(search: $search, skip: $skip, take: $take) {\n      id\n      username\n      createdAt\n      club {\n        title\n      }\n    }\n  }\n"): typeof import('./graphql').PlayersDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query PlayerProfile($id: Int!) {\n    user(id: $id) {\n      id\n      username\n      createdAt\n      profile {\n        firstName\n        lastName\n      }\n      club {\n        title\n      }\n      socials {\n        type\n        link\n      }\n    }\n    players(userId: $id, take: 50) {\n      id\n      status\n      points\n      role {\n        name\n        team\n      }\n      game {\n        id\n        status\n        startDate\n        winnerTeam\n        gameType {\n          name\n        }\n      }\n    }\n  }\n"): typeof import('./graphql').PlayerProfileDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query Rating($from: DateTime, $take: Int!) {\n    rating(from: $from, take: $take) {\n      place\n      points\n      games\n      wins\n      winRate\n      user {\n        id\n        username\n      }\n    }\n  }\n"): typeof import('./graphql').RatingDocument;
 
 
 export function graphql(source: string) {

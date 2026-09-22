@@ -234,6 +234,52 @@ export type SearchUsersQueryVariables = Exact<{
 
 export type SearchUsersQuery = { users: Array<{ id: string, username: string }> };
 
+export type UpcomingGamesQueryVariables = Exact<{
+  from: string;
+  take: number;
+}>;
+
+
+export type UpcomingGamesQuery = { games: Array<{ id: string, status: GameStatus, phase: GamePhase | null, currentRound: number, startDate: string, gameType: { name: string, playersCount: number }, players: Array<{ id: string }> }> };
+
+export type RecentGamesQueryVariables = Exact<{
+  take: number;
+}>;
+
+
+export type RecentGamesQuery = { games: Array<{ id: string, startDate: string, winnerTeam: Team | null, gameType: { name: string } }> };
+
+export type PublicGameQueryVariables = Exact<{
+  id: number;
+}>;
+
+
+export type PublicGameQuery = { game: { id: string, status: GameStatus, phase: GamePhase | null, currentRound: number, startDate: string, finishedAt: string | null, winnerTeam: Team | null, gameType: { name: string, playersCount: number }, players: Array<{ id: string, userId: number, seatNumber: number | null, username: string, status: PlayerStatus, fouls: number, points: number, eliminatedRound: number | null, role: { name: string, team: Team } | null }> } };
+
+export type PlayersQueryVariables = Exact<{
+  search?: string | null | undefined;
+  skip: number;
+  take: number;
+}>;
+
+
+export type PlayersQuery = { users: Array<{ id: string, username: string, createdAt: string, club: { title: string } | null }> };
+
+export type PlayerProfileQueryVariables = Exact<{
+  id: number;
+}>;
+
+
+export type PlayerProfileQuery = { user: { id: string, username: string, createdAt: string, profile: { firstName: string | null, lastName: string | null } | null, club: { title: string } | null, socials: Array<{ type: string, link: string }> }, players: Array<{ id: string, status: PlayerStatus, points: number, role: { name: string, team: Team } | null, game: { id: string, status: GameStatus, startDate: string, winnerTeam: Team | null, gameType: { name: string } } }> };
+
+export type RatingQueryVariables = Exact<{
+  from?: string | null | undefined;
+  take: number;
+}>;
+
+
+export type RatingQuery = { rating: Array<{ place: number, points: number, games: number, wins: number, winRate: number, user: { id: string, username: string } }> };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -507,3 +553,129 @@ export const SearchUsersDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SearchUsersQuery, SearchUsersQueryVariables>;
+export const UpcomingGamesDocument = new TypedDocumentString(`
+    query UpcomingGames($from: DateTime!, $take: Int!) {
+  games(statuses: [WAITING, IN_PROGRESS], from: $from, take: $take) {
+    id
+    status
+    phase
+    currentRound
+    startDate
+    gameType {
+      name
+      playersCount
+    }
+    players {
+      id
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<UpcomingGamesQuery, UpcomingGamesQueryVariables>;
+export const RecentGamesDocument = new TypedDocumentString(`
+    query RecentGames($take: Int!) {
+  games(statuses: [FINISHED], take: $take) {
+    id
+    startDate
+    winnerTeam
+    gameType {
+      name
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<RecentGamesQuery, RecentGamesQueryVariables>;
+export const PublicGameDocument = new TypedDocumentString(`
+    query PublicGame($id: Float!) {
+  game(id: $id) {
+    id
+    status
+    phase
+    currentRound
+    startDate
+    finishedAt
+    winnerTeam
+    gameType {
+      name
+      playersCount
+    }
+    players {
+      id
+      userId
+      seatNumber
+      username
+      status
+      fouls
+      points
+      eliminatedRound
+      role {
+        name
+        team
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PublicGameQuery, PublicGameQueryVariables>;
+export const PlayersDocument = new TypedDocumentString(`
+    query Players($search: String, $skip: Int!, $take: Int!) {
+  users(search: $search, skip: $skip, take: $take) {
+    id
+    username
+    createdAt
+    club {
+      title
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PlayersQuery, PlayersQueryVariables>;
+export const PlayerProfileDocument = new TypedDocumentString(`
+    query PlayerProfile($id: Int!) {
+  user(id: $id) {
+    id
+    username
+    createdAt
+    profile {
+      firstName
+      lastName
+    }
+    club {
+      title
+    }
+    socials {
+      type
+      link
+    }
+  }
+  players(userId: $id, take: 50) {
+    id
+    status
+    points
+    role {
+      name
+      team
+    }
+    game {
+      id
+      status
+      startDate
+      winnerTeam
+      gameType {
+        name
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<PlayerProfileQuery, PlayerProfileQueryVariables>;
+export const RatingDocument = new TypedDocumentString(`
+    query Rating($from: DateTime, $take: Int!) {
+  rating(from: $from, take: $take) {
+    place
+    points
+    games
+    wins
+    winRate
+    user {
+      id
+      username
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<RatingQuery, RatingQueryVariables>;

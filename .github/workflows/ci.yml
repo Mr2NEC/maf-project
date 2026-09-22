@@ -75,6 +75,8 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
+      # Generated GraphQL types must match backend/src/schema.gql and the queries
+      - run: npm run codegen:check
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build

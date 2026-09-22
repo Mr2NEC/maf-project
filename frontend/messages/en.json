@@ -25,25 +25,57 @@
     "uk": "Ukrainian"
   },
   "index-page": {
-    "title": "Home page"
+    "title": "Mafia club",
+    "lead": "Games calendar, player profiles and the club rating. Hosts run games from their own panel.",
+    "next-games": "Next games",
+    "all-games": "Calendar",
+    "top-players": "Top players",
+    "full-rating": "Full rating"
   },
   "about-page": {
     "title": "About us page"
   },
   "calendar-page": {
-    "title": "Calendar page"
+    "title": "Calendar",
+    "description": "Upcoming and running games"
   },
   "tournaments-page": {
     "title": "Tournaments page"
   },
   "players-page": {
-    "title": "Players page"
+    "title": "Players",
+    "search": "Search by nickname",
+    "find": "Find",
+    "empty": "Nobody found",
+    "member-since": "With the club since {date}",
+    "previous": "Previous",
+    "next": "Next"
   },
   "player-page": {
-    "title": "Player page"
+    "title": "Player",
+    "member-since": "With the club since {date}",
+    "games": "Games",
+    "wins": "Wins",
+    "points": "Points",
+    "win-rate": "Win rate",
+    "history": "Games",
+    "no-games": "No games yet",
+    "date": "Date",
+    "game": "Game",
+    "role": "Role",
+    "result": "Result",
+    "won": "Win",
+    "lost": "Loss"
   },
   "rating-page": {
-    "title": "Rating page"
+    "title": "Rating",
+    "period": "Period",
+    "periods": {
+      "all": "All time",
+      "year": "This year",
+      "month": "This month"
+    },
+    "rules": "1 point for a win plus bonus points from the host. Ties are broken by wins, then by fewer games."
   },
   "blog-page": {
     "title": "Blog page"
@@ -159,5 +191,27 @@
     "bonus-player": "Bonus to",
     "bonus-points": "Points",
     "add-bonus": "Add bonus"
+  },
+  "games": {
+    "no-upcoming": "No games scheduled yet",
+    "free-seats": "{count, plural, one {# seat left} other {# seats left}}",
+    "full": "Table is full"
+  },
+  "rating": {
+    "empty": "No finished games yet",
+    "player": "Player",
+    "points": "Points",
+    "games": "Games",
+    "wins": "Wins",
+    "win-rate": "Win rate"
+  },
+  "game-page": {
+    "title": "Game: {type}",
+    "no-players": "Nobody has been seated yet",
+    "player": "Player",
+    "role": "Role",
+    "status": "Status",
+    "points": "Points",
+    "hidden-role": "hidden until the end"
   }
 }

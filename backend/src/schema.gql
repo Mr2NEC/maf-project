@@ -427,7 +427,7 @@ type User {
   email: String
   id: ID!
   players: [Player!]!
-  profile: Profile!
+  profile: Profile
   profileId: Int
   role: UserRole!
   socials: [Social!]!
