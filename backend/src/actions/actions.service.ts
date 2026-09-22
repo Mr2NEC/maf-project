@@ -1,3 +1,4 @@
+import { PaginationArgs } from 'src/common/dto/pagination.args';
 import {
   BadRequestException,
   Injectable,
@@ -72,9 +73,12 @@ export class ActionsService {
     return this.actionsRepository.save(action);
   }
 
-  findAll() {
+  findAll({ skip, take }: PaginationArgs) {
     return this.actionsRepository.find({
       relations: ['targets', 'targets.target'],
+      order: { id: 'ASC' },
+      skip,
+      take,
     });
   }
 

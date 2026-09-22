@@ -1,3 +1,4 @@
+import { PaginationArgs } from 'src/common/dto/pagination.args';
 import { ForbiddenException } from '@nestjs/common';
 import {
   Args,
@@ -23,8 +24,8 @@ export class UsersResolver {
 
   @Public()
   @Query(() => [User], { name: 'users' })
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Args() { skip, take }: PaginationArgs) {
+    return this.usersService.findAll({ skip, take, order: { id: 'ASC' } });
   }
 
   @Public()

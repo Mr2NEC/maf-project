@@ -1,3 +1,4 @@
+import { PaginationArgs } from 'src/common/dto/pagination.args';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/enums/user-role.enum';
@@ -19,8 +20,8 @@ export class ActionsResolver {
 
   @Public()
   @Query(() => [Action], { name: 'actions' })
-  findAll() {
-    return this.actionsService.findAll();
+  findAll(@Args() pagination: PaginationArgs) {
+    return this.actionsService.findAll(pagination);
   }
 
   @Public()

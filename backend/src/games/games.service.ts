@@ -1,3 +1,4 @@
+import { PaginationArgs } from 'src/common/dto/pagination.args';
 import {
   BadRequestException,
   Injectable,
@@ -18,8 +19,13 @@ export class GamesService {
     private gameTypesRepository: GameTypesService,
   ) {}
 
-  async findAll(): Promise<Game[]> {
-    return this.gamesRepository.find({ relations: ['gameType', 'players'] });
+  findAll({ skip, take }: PaginationArgs): Promise<Game[]> {
+    return this.gamesRepository.find({
+      relations: ['gameType', 'players'],
+      order: { startDate: 'DESC', id: 'DESC' },
+      skip,
+      take,
+    });
   }
 
   async findOne(id: number): Promise<Game> {

@@ -1,3 +1,4 @@
+import { PaginationArgs } from 'src/common/dto/pagination.args';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Args, Int, Query, Resolver } from '@nestjs/graphql';
 import { PlayersService } from './players.service';
@@ -15,7 +16,7 @@ export class PlayersResolver {
 
   @Public()
   @Query(() => [Player], { name: 'players' })
-  async findAll(): Promise<Player[]> {
-    return this.playersService.findAll();
+  findAll(@Args() { skip, take }: PaginationArgs): Promise<Player[]> {
+    return this.playersService.findAll({ skip, take, order: { id: 'ASC' } });
   }
 }

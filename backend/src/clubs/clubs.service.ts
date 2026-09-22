@@ -1,3 +1,4 @@
+import { PaginationArgs } from 'src/common/dto/pagination.args';
 import { Injectable } from '@nestjs/common';
 import { CreateClubInput } from './dto/create-club.input';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -65,9 +66,12 @@ export class ClubsService {
     return this.clubsRepository.save(club);
   }
 
-  findAll(): Promise<Club[]> {
+  findAll({ skip, take }: PaginationArgs): Promise<Club[]> {
     return this.clubsRepository.find({
       relations: ['owner', 'place', 'socials'],
+      order: { id: 'ASC' },
+      skip,
+      take,
     });
   }
 

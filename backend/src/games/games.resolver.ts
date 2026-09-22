@@ -1,3 +1,4 @@
+import { PaginationArgs } from 'src/common/dto/pagination.args';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/enums/user-role.enum';
@@ -13,8 +14,8 @@ export class GamesResolver {
 
   @Public()
   @Query(() => [Game], { name: 'games' })
-  async findAll() {
-    return this.gamesService.findAll();
+  findAll(@Args() pagination: PaginationArgs) {
+    return this.gamesService.findAll(pagination);
   }
 
   @Public()

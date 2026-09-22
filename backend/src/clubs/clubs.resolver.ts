@@ -1,3 +1,4 @@
+import { PaginationArgs } from 'src/common/dto/pagination.args';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/enums/user-role.enum';
@@ -18,8 +19,8 @@ export class ClubsResolver {
 
   @Public()
   @Query(() => [Club])
-  findAllClubs(): Promise<Club[]> {
-    return this.clubsService.findAll();
+  findAllClubs(@Args() pagination: PaginationArgs): Promise<Club[]> {
+    return this.clubsService.findAll(pagination);
   }
 
   @Public()
