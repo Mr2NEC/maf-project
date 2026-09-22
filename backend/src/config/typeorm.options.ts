@@ -16,7 +16,8 @@ export function buildTypeOrmOptions(db: DatabaseConfig): DataSourceOptions {
     database: db.name,
     entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
     migrations: [join(__dirname, '..', 'migrations', '*.{ts,js}')],
-    synchronize: db.synchronize,
+    // Schema changes go through migrations only (npm run migration:generate)
+    synchronize: false,
     extra: { connectionLimit: 5 },
   };
 }

@@ -6,7 +6,6 @@ export interface DatabaseConfig {
   username: string;
   password: string;
   name: string;
-  synchronize: boolean;
 }
 
 // Values are guaranteed by validateEnv (config/env.validation.ts)
@@ -16,5 +15,4 @@ export const databaseConfig = registerAs<DatabaseConfig>('database', () => ({
   username: process.env.MYSQL_USER as string,
   password: process.env.MYSQL_PASSWORD as string,
   name: process.env.MYSQL_DATABASE as string,
-  synchronize: process.env.NODE_ENV === 'development',
 }));

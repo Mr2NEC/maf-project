@@ -59,6 +59,8 @@ const MAX_QUERY_DEPTH = 8;
         ),
         autoLoadEntities: true,
         verboseRetryLog: true,
+        // Apply pending migrations on startup
+        migrationsRun: true,
       }),
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
@@ -66,10 +68,11 @@ const MAX_QUERY_DEPTH = 8;
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         debug: configService.get<boolean>('graphql.debug'),
-        formatError: error =>
+        formatError: (formatted, error) =>
           formatGraphQLError(
-            error,
+            formatted,
             configService.get<boolean>('graphql.debug') ?? false,
+            error,
           ),
         validationRules: [depthLimit(MAX_QUERY_DEPTH)],
         // GraphQL Playground is not compatible with Apollo Server 5; use Apollo Sandbox instead

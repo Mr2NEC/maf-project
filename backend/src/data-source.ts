@@ -17,6 +17,4 @@ if (existsSync('.env')) {
 export default new DataSource({
   // registerAs factories are synchronous here
   ...buildTypeOrmOptions(databaseConfig() as DatabaseConfig),
-  // The CLI must only apply migrations, never sync the schema
-  synchronize: false,
 });

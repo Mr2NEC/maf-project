@@ -20,8 +20,6 @@ import { DataInitializerModule } from 'src/data-initializer/data-initializer.mod
         ...buildTypeOrmOptions(
           configService.getOrThrow<DatabaseConfig>('database'),
         ),
-        // Scripts must never change the schema
-        synchronize: false,
       }),
     }),
     DataInitializerModule,

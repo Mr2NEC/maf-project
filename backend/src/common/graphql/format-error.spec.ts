@@ -1,3 +1,5 @@
+import { ThrottlerException } from '@nestjs/throttler';
+import { GraphQLError } from 'graphql';
 import { formatGraphQLError } from './format-error';
 
 describe('formatGraphQLError', () => {
@@ -33,6 +35,25 @@ describe('formatGraphQLError', () => {
 
     expect(result.message).toBe('Client error');
     expect(result.extensions?.code).toBe(code);
+  });
+
+  it('reads the status from an HttpException that Nest did not map', () => {
+    const throttled = new GraphQLError('Too Many Requests', {
+      path: ['signIn'],
+      originalError: new ThrottlerException(),
+    });
+
+    const result = formatGraphQLError(
+      {
+        message: 'ThrottlerException: Too Many Requests',
+        extensions: { code: 'INTERNAL_SERVER_ERROR' },
+      },
+      false,
+      throttled,
+    );
+
+    expect(result.extensions?.code).toBe('TOO_MANY_REQUESTS');
+    expect(result.message).toBe('ThrottlerException: Too Many Requests');
   });
 
   it('hides internals of unexpected errors', () => {

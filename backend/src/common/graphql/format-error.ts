@@ -1,3 +1,5 @@
+import { unwrapResolverError } from '@apollo/server/errors';
+import { HttpException } from '@nestjs/common';
 import { GraphQLFormattedError } from 'graphql';
 
 /** Codes that are safe to show to clients as-is. */
@@ -34,11 +36,20 @@ type ErrorExtensions = {
   stacktrace?: string[];
 };
 
-function resolveCode({ code, status }: ErrorExtensions): string {
-  if (status !== undefined) {
+function resolveCode(
+  { code, status }: ErrorExtensions,
+  originalError: unknown,
+): string {
+  // Some HttpExceptions (e.g. ThrottlerException) are not recognized by
+  // @nestjs/apollo and arrive without `status`; read it from the exception.
+  const exception = unwrapResolverError(originalError);
+  const httpStatus =
+    exception instanceof HttpException ? exception.getStatus() : status;
+
+  if (httpStatus !== undefined) {
     return (
-      CODE_BY_HTTP_STATUS[status] ??
-      (status < 500 ? 'BAD_REQUEST' : 'INTERNAL_SERVER_ERROR')
+      CODE_BY_HTTP_STATUS[httpStatus] ??
+      (httpStatus < 500 ? 'BAD_REQUEST' : 'INTERNAL_SERVER_ERROR')
     );
   }
   return code ?? 'INTERNAL_SERVER_ERROR';
@@ -52,9 +63,10 @@ function resolveCode({ code, status }: ErrorExtensions): string {
 export function formatGraphQLError(
   formatted: GraphQLFormattedError,
   debug: boolean,
+  originalError?: unknown,
 ): GraphQLFormattedError {
   const extensions = (formatted.extensions ?? {}) as ErrorExtensions;
-  const code = resolveCode(extensions);
+  const code = resolveCode(extensions, originalError);
   const isClientError = CLIENT_ERROR_CODES.has(code);
 
   // class-validator errors arrive as a list of messages in originalError

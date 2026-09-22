@@ -89,18 +89,21 @@ export class UsersService {
       });
     }
 
+    // Save before adding socials: saving an entity with a loaded relation array
+    // would unlink socials created after it was loaded
+    await this.usersRepository.save(user);
+
     if (socials?.length) {
       await this.addMissingSocials(user, socials);
     }
 
-    await this.usersRepository.save(user);
     return this.findOne(id);
   }
 
   async setRole(id: number, role: UserRole): Promise<User> {
-    const user = await this.findOne(id);
-    user.role = role;
-    return this.usersRepository.save(user);
+    await this.findOne(id);
+    await this.usersRepository.update(id, { role });
+    return this.findOne(id);
   }
 
   async remove(id: number): Promise<boolean> {

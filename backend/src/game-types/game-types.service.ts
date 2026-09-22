@@ -10,7 +10,6 @@ import { GameTypeRolesService } from 'src/game-type-roles/game-type-roles.servic
 import { GameType } from './entities/game-type.entity';
 import { CreateGameTypeInput } from './dto/create-game-type.input';
 import { UpdateGameTypeInput } from './dto/update-game-type.input';
-import { GameTypeRole } from 'src/game-type-roles/entities/game-type-role.entity';
 import { RolesService } from 'src/roles/roles.service';
 
 @Injectable()
@@ -59,12 +58,6 @@ export class GameTypesService {
       throw new BadRequestException('Players count must be at least 2');
     }
 
-    const gameType = this.gameTypeRepository.create({
-      name,
-      playersCount,
-      description,
-    });
-
     const totalRoles = gameTypeRoles.reduce((sum, role) => sum + role.count, 0);
 
     if (totalRoles !== playersCount) {
@@ -73,31 +66,25 @@ export class GameTypesService {
       );
     }
 
-    const roles: GameTypeRole[] = [];
-
-    for (const gameTypeRole of gameTypeRoles) {
-      if (!gameTypeRole.roleId) {
-        throw new BadRequestException('Role ID is required');
-      }
-
-      const role = await this.rolesService.findOne(gameTypeRole.roleId);
-
-      if (!role) {
-        throw new NotFoundException(
-          `Role with id ${gameTypeRole.roleId} not found`,
-        );
-      }
-
-      const typeRole = await this.gameTypeRolesService.create({
-        gameTypeId: gameType.id,
-        roleId: role.id,
-        count: gameTypeRole.count,
-      });
-
-      roles.push(typeRole);
+    // Validate every role before writing anything
+    for (const { roleId } of gameTypeRoles) {
+      await this.rolesService.findOne(roleId);
     }
 
-    return this.gameTypeRepository.save(gameType);
+    // The game type must be saved first: its id is the roles' foreign key
+    const gameType = await this.gameTypeRepository.save(
+      this.gameTypeRepository.create({ name, playersCount, description }),
+    );
+
+    for (const { roleId, count } of gameTypeRoles) {
+      await this.gameTypeRolesService.create({
+        gameTypeId: gameType.id,
+        roleId,
+        count,
+      });
+    }
+
+    return this.findOne(gameType.id);
   }
 
   async update(id: number, data: UpdateGameTypeInput): Promise<GameType> {
