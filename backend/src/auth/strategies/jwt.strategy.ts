@@ -8,24 +8,17 @@ import { AuthJwtPayload } from '../types/auth-jwt-payload';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private configService: ConfigService,
-    private authService: AuthService,
+    configService: ConfigService,
+    private readonly authService: AuthService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get<string>('jwt.secret') as string,
+      secretOrKey: configService.getOrThrow<string>('jwt.secret'),
       ignoreExpiration: false,
     });
   }
 
   validate(payload: AuthJwtPayload) {
-    const { userId } = payload.sub;
-    console.log({ userId });
-
-    const jwtUser = this.authService.validateJwtUser(userId);
-
-    console.log({ jwtUser });
-
-    return jwtUser;
+    return this.authService.validateJwtUser(payload.sub.userId);
   }
 }

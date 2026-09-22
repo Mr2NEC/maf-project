@@ -5,7 +5,8 @@ export interface JwtConfig {
   expiresIn: string;
 }
 
+// Values are guaranteed by validateEnv (config/env.validation.ts)
 export const jwtConfig = registerAs<JwtConfig>('jwt', () => ({
-  secret: process.env.JWT_SECRET || 'secret',
-  expiresIn: process.env.JWT_EXPIRES_IN || '60m',
+  secret: process.env.JWT_SECRET as string,
+  expiresIn: process.env.JWT_EXPIRES_IN ?? '15m',
 }));

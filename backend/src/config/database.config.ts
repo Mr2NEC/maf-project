@@ -9,11 +9,12 @@ export interface DatabaseConfig {
   synchronize: boolean;
 }
 
+// Values are guaranteed by validateEnv (config/env.validation.ts)
 export const databaseConfig = registerAs<DatabaseConfig>('database', () => ({
-  host: process.env.MYSQL_HOST || 'localhost',
+  host: process.env.MYSQL_HOST as string,
   port: process.env.MYSQL_PORT ? parseInt(process.env.MYSQL_PORT, 10) : 3306,
-  username: process.env.MYSQL_USER || 'maf',
-  password: process.env.MYSQL_PASSWORD || 'password',
-  name: process.env.MYSQL_DATABASE || 'maf_db',
-  synchronize: process.env.NODE_ENV === 'development' ? true : false,
+  username: process.env.MYSQL_USER as string,
+  password: process.env.MYSQL_PASSWORD as string,
+  name: process.env.MYSQL_DATABASE as string,
+  synchronize: process.env.NODE_ENV === 'development',
 }));
